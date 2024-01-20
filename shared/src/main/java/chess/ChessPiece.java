@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -81,15 +80,107 @@ public class ChessPiece {
 
             if (possiblePiece == null) {
                 validMoves.add(new ChessMove(originalPosition, newPosition, null));
-                if(getPieceType() != PieceType.KNIGHT){
+                if(getPieceType() != PieceType.KNIGHT && getPieceType() != PieceType.KING){
                     findDiagonalHorizontalRecursive(board, originalPosition, newPosition, validMoves, rowDirect, colDirect);
                 }
-            } else if (possiblePiece.pieceColor != getTeamColor()) {
+            }
+            else if (possiblePiece.pieceColor != getTeamColor()) {
+
                 validMoves.add(new ChessMove(originalPosition, newPosition, null));
+
             }
         }
-
     }
+    private void findPawnWhite(ChessBoard board, ChessPosition curPosition, Collection<ChessMove> validMoves, int rowDirect, int colDirect) {
+        ChessPosition newPosition = new ChessPosition(curPosition.getRow() + rowDirect, curPosition.getColumn() + colDirect);
+        if (isPositionValid(newPosition)) {
+            ChessPiece possiblePiece = board.getPiece(newPosition);
+            if (colDirect == -1 || colDirect == +1) {
+                if (newPosition.getRow() == 8) {
+                    if (possiblePiece != null && possiblePiece.pieceColor != getTeamColor()) {
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.ROOK));
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.BISHOP));
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.KNIGHT));
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.QUEEN));
+                    }
+                } else {
+                    if (possiblePiece != null && possiblePiece.pieceColor != getTeamColor()) {
+                        validMoves.add(new ChessMove(curPosition, newPosition, null));
+                    }
+                }
+
+            } else {
+                if (rowDirect == 2) {
+                    if(curPosition.getRow() == 2){
+                        ChessPosition blocked = new ChessPosition(curPosition.getRow() + 1, curPosition.getColumn());
+                        ChessPiece blockedPiece = board.getPiece(blocked);
+                        if (blockedPiece == null && possiblePiece == null) {
+                            validMoves.add(new ChessMove(curPosition, newPosition, null));
+                        }
+                    }
+                }
+                else{
+                    if(possiblePiece == null){
+                        if(newPosition.getRow() == 8 || newPosition.getRow() == 1){
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.ROOK));
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.BISHOP));
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.KNIGHT));
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.QUEEN));
+                        }
+                        else{
+                            validMoves.add(new ChessMove(curPosition, newPosition, null));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void findPawnBlack(ChessBoard board, ChessPosition curPosition, Collection<ChessMove> validMoves, int rowDirect, int colDirect) {
+        ChessPosition newPosition = new ChessPosition(curPosition.getRow() + rowDirect, curPosition.getColumn() + colDirect);
+        if (isPositionValid(newPosition)) {
+            ChessPiece possiblePiece = board.getPiece(newPosition);
+            if (colDirect == -1 || colDirect == +1) {
+                if (newPosition.getRow() == 1) {
+                    if (possiblePiece != null && possiblePiece.pieceColor != getTeamColor()) {
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.ROOK));
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.BISHOP));
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.KNIGHT));
+                        validMoves.add(new ChessMove(curPosition, newPosition, PieceType.QUEEN));
+                    }
+                } else {
+                    if (possiblePiece != null && possiblePiece.pieceColor != getTeamColor()) {
+                        validMoves.add(new ChessMove(curPosition, newPosition, null));
+                    }
+                }
+
+            } else {
+                if (rowDirect == -2) {
+                    if(curPosition.getRow() == 7){
+                        ChessPosition blocked = new ChessPosition(curPosition.getRow() - 1, curPosition.getColumn());
+                        ChessPiece blockedPiece = board.getPiece(blocked);
+                        if (blockedPiece == null && possiblePiece == null) {
+                            validMoves.add(new ChessMove(curPosition, newPosition, null));
+                        }
+                    }
+                }
+                else{
+                    if(possiblePiece == null){
+                        if(newPosition.getRow() == 1){
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.ROOK));
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.BISHOP));
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.KNIGHT));
+                            validMoves.add(new ChessMove(curPosition, newPosition, PieceType.QUEEN));
+                        }
+                        else{
+                            validMoves.add(new ChessMove(curPosition, newPosition, null));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
 
 
@@ -99,7 +190,18 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove>calculateKingMoves(ChessBoard board, ChessPosition myPosition){
-        return new ArrayList<>();
+        Collection<ChessMove> validMoves = new ArrayList<>();
+
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, 0);
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, -1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 0, -1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 0, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, 0);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, -1);
+
+        return validMoves;
     }
     private Collection<ChessMove>calculateQueenMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> validMoves = new ArrayList<>();
@@ -149,8 +251,23 @@ public class ChessPiece {
         return validMoves;
     }
     private Collection<ChessMove>calculatePawnMoves(ChessBoard board, ChessPosition myPosition){
-        return new ArrayList<>();
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        if(getTeamColor() == ChessGame.TeamColor.WHITE){
+            findPawnWhite(board, myPosition, validMoves, 1, 0);
+            findPawnWhite(board, myPosition, validMoves, 2, 0);
+            findPawnWhite(board, myPosition, validMoves, 1, -1);
+            findPawnWhite(board, myPosition, validMoves, 1, 1);
+            return validMoves;
+        }
+        else{
+            findPawnBlack(board, myPosition, validMoves, -1, 0);
+            findPawnBlack(board, myPosition, validMoves, -2, 0);
+            findPawnBlack(board, myPosition, validMoves, -1, -1);
+            findPawnBlack(board, myPosition, validMoves, -1, 1);
+            return validMoves;
+        }
     }
+
 
     @Override
     public boolean equals(Object o) {
