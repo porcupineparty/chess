@@ -41,7 +41,35 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for(int column = 1; column < 9; column++){
+            addPiece(new ChessPosition(2, column), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            switch(column){
+                case 1:
+                case 8:
+                    addPiece(new ChessPosition(1, column), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+                    addPiece(new ChessPosition(8, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+                    break;
+                case 2:
+                case 7:
+                    addPiece(new ChessPosition(1, column), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+                    addPiece(new ChessPosition(8, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+                    break;
+                case 3:
+                case 6:
+                    addPiece(new ChessPosition(1, column), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+                    addPiece(new ChessPosition(8, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+                    break;
+                case 4:
+                    addPiece(new ChessPosition(1, column), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
+                    addPiece(new ChessPosition(8, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+                    break;
+                case 5:
+                    addPiece(new ChessPosition(1, column), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
+                    addPiece(new ChessPosition(8, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+                    break;
+            }
+        }
     }
 
     @Override
@@ -59,8 +87,19 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        return "ChessBoard{" +
-                "squares=" + Arrays.toString(squares) +
-                '}';
+        StringBuilder result = new StringBuilder("ChessBoard{\n");
+        for (ChessPiece[] row : squares) {
+            result.append("  ");
+            for (ChessPiece piece : row) {
+                if (piece != null) {
+                    result.append(piece.getPieceType()).append("\t");
+                } else {
+                    result.append("EMPTY\t");
+                }
+            }
+            result.append("\n");
+        }
+        result.append("}");
+        return result.toString();
     }
 }
