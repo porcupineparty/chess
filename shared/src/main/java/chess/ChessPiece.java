@@ -2,6 +2,8 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -18,6 +20,7 @@ public class ChessPiece {
 
         this.pieceColor = pieceColor;
         this.type = type;
+
     }
 
     /**
@@ -54,7 +57,119 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new ArrayList<>();
+        return switch (type) {
+            case KING -> calculateKingMoves(board, myPosition);
+            case QUEEN -> calculateQueenMoves(board, myPosition);
+            case BISHOP -> calculateBishopMoves(board, myPosition);
+            case KNIGHT -> calculateKnightMoves(board, myPosition);
+            case ROOK -> calculateRookMoves(board, myPosition);
+            case PAWN -> calculatePawnMoves(board, myPosition);
+            default -> new ArrayList<>();
+        };
+
+
         //gonna have to change this later.
+    }
+    private void findDiagonalHorizontal(ChessBoard board, ChessPosition curPosition, Collection<ChessMove> validMoves, int rowDirect, int colDirect){
+        findDiagonalHorizontalRecursive(board, curPosition, curPosition, validMoves, rowDirect, colDirect);
+    }
+    private void findDiagonalHorizontalRecursive(ChessBoard board, ChessPosition originalPosition, ChessPosition curPosition, Collection<ChessMove> validMoves, int rowDirect, int colDirect){
+        ChessPosition newPosition = new ChessPosition(curPosition.getRow() + rowDirect, curPosition.getColumn() + colDirect);
+
+        if (isPositionValid(newPosition)) {
+            ChessPiece possiblePiece = board.getPiece(newPosition);
+
+            if (possiblePiece == null) {
+                validMoves.add(new ChessMove(originalPosition, newPosition, null));
+                if(getPieceType() != PieceType.KNIGHT){
+                    findDiagonalHorizontalRecursive(board, originalPosition, newPosition, validMoves, rowDirect, colDirect);
+                }
+            } else if (possiblePiece.pieceColor != getTeamColor()) {
+                validMoves.add(new ChessMove(originalPosition, newPosition, null));
+            }
+        }
+
+    }
+
+
+
+
+    private Boolean isPositionValid(ChessPosition position){
+        return position.getRow() >= 1 && position.getColumn() >= 1 && position.getRow() < 9 && position.getColumn() < 9;
+    }
+
+    private Collection<ChessMove>calculateKingMoves(ChessBoard board, ChessPosition myPosition){
+        return new ArrayList<>();
+    }
+    private Collection<ChessMove>calculateQueenMoves(ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, -1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, -1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, 0);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, 0);
+        findDiagonalHorizontal(board, myPosition, validMoves, 0, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 0, -1);
+
+        return validMoves;
+    }
+    private Collection<ChessMove>calculateBishopMoves(ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, -1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, -1);
+
+        return validMoves;
+    }
+
+    private Collection<ChessMove>calculateKnightMoves(ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, 2);
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, -2);
+        findDiagonalHorizontal(board, myPosition, validMoves, 2, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 2, -1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, 2);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, -2);
+        findDiagonalHorizontal(board, myPosition, validMoves, -2, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, -2, -1);
+        return validMoves;
+    }
+    private Collection<ChessMove>calculateRookMoves(ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+
+        findDiagonalHorizontal(board, myPosition, validMoves, 1, 0);
+        findDiagonalHorizontal(board, myPosition, validMoves, -1, 0);
+        findDiagonalHorizontal(board, myPosition, validMoves, 0, 1);
+        findDiagonalHorizontal(board, myPosition, validMoves, 0, -1);
+
+        return validMoves;
+    }
+    private Collection<ChessMove>calculatePawnMoves(ChessBoard board, ChessPosition myPosition){
+        return new ArrayList<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "pieceColor=" + pieceColor +
+                ", type=" + type +
+                '}';
     }
 }
