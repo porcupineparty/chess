@@ -135,7 +135,6 @@ public class ChessPiece {
             }
         }
     }
-
     private void findPawnBlack(ChessBoard board, ChessPosition curPosition, Collection<ChessMove> validMoves, int rowDirect, int colDirect) {
         ChessPosition newPosition = new ChessPosition(curPosition.getRow() + rowDirect, curPosition.getColumn() + colDirect);
         if (isPositionValid(newPosition)) {
@@ -180,15 +179,9 @@ public class ChessPiece {
             }
         }
     }
-
-
-
-
-
     private Boolean isPositionValid(ChessPosition position){
         return position.getRow() >= 1 && position.getColumn() >= 1 && position.getRow() < 9 && position.getColumn() < 9;
     }
-
     private Collection<ChessMove>calculateKingMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> validMoves = new ArrayList<>();
 
@@ -227,7 +220,6 @@ public class ChessPiece {
 
         return validMoves;
     }
-
     private Collection<ChessMove>calculateKnightMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> validMoves = new ArrayList<>();
         findDiagonalHorizontal(board, myPosition, validMoves, 1, 2);
