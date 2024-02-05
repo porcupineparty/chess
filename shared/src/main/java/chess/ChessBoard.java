@@ -36,10 +36,21 @@ public class ChessBoard {
         return squares[position.getRow() - 1][position.getColumn() - 1];
     }
 
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
+    public ChessPosition getKing(ChessGame.TeamColor color){
+        for(int column = 1; column < 9; column++){
+            for(int row = 1; row < 9; row++){
+                if(squares[column][row].getPieceType() == ChessPiece.PieceType.KING && squares[column][row].getTeamColor() == color){
+                    return new ChessPosition(row, column);
+                }
+            }
+        }
+        return null;
+    }
     public void resetBoard() {
         for(int column = 1; column < 9; column++){
             addPiece(new ChessPosition(2, column), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
@@ -71,6 +82,7 @@ public class ChessBoard {
             }
         }
     }
+
 
     @Override
     public boolean equals(Object o) {

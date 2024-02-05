@@ -10,6 +10,10 @@ import java.util.Collection;
  */
 public class ChessGame {
 
+    private TeamColor teamTurn;
+    private ChessBoard myChessBoard;
+    private ChessPosition kingPosition;
+
     public ChessGame() {
 
     }
@@ -18,7 +22,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -27,7 +31,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        teamTurn = team;
     }
 
     /**
@@ -46,7 +50,11 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if(startPosition == null){
+            return null;
+        }
+
+        return null;
     }
 
     /**
@@ -56,17 +64,52 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        throw new InvalidMoveException("Not implemented");
     }
 
     /**
-     * Determines if the given team is in check
+     * Determines if the given eam is in check
      *
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        kingPosition = myChessBoard.getKing(teamColor);
+        if (isCheckRowCol(kingPosition, teamColor)) return true;
+
+        return false;
+
+
+    }
+
+    private boolean isCheckRowCol(ChessPosition kingPosition, TeamColor teamColor){
+        return (isCheckRowColRec(kingPosition, teamColor, 0, 1) ||
+        isCheckRowColRec(kingPosition, teamColor, 0, -1) ||
+        isCheckRowColRec(kingPosition, teamColor, 1, 0) ||
+        isCheckRowColRec(kingPosition, teamColor, -1, 0));
+    }
+
+    private boolean isCheckRowColRec(ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
+        ChessPosition newPosition = new ChessPosition(nextPosition.getRow() + row, nextPosition.getColumn() + col);
+        if(isPositionValid(newPosition)){
+            if(myChessBoard.getPiece(newPosition) == null){
+                isCheckRowColRec(newPosition, teamColor,row, col);
+            }
+            else if(myChessBoard.getPiece(newPosition).getTeamColor() != teamColor){
+                if(myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.QUEEN || myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.ROOK){
+                    return true;
+                }
+
+            }
+            else if(myChessBoard.getPiece(newPosition).getTeamColor() == teamColor){
+                return false;
+            }
+        }
+        //shouldn't execute
+        return false;
+    }
+    private Boolean isPositionValid(ChessPosition position){
+        return position.getRow() >= 1 && position.getColumn() >= 1 && position.getRow() < 9 && position.getColumn() < 9;
     }
 
     /**
@@ -80,7 +123,7 @@ public class ChessGame {
     }
 
     /**
-     * Determines if the given team is in stalemate, which here is defined as having
+    * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves
      *
      * @param teamColor which team to check for stalemate
@@ -96,7 +139,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        myChessBoard = board;
     }
 
     /**
@@ -105,6 +148,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return myChessBoard;
     }
 }

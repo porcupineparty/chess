@@ -63,7 +63,7 @@ public class ChessPiece {
             case KNIGHT -> calculateKnightMoves(board, myPosition);
             case ROOK -> calculateRookMoves(board, myPosition);
             case PAWN -> calculatePawnMoves(board, myPosition);
-            default -> new ArrayList<>();
+
         };
 
 
