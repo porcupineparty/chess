@@ -42,10 +42,11 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public ChessPosition getKing(ChessGame.TeamColor color){
-        for(int column = 1; column < 9; column++){
-            for(int row = 1; row < 9; row++){
-                if(squares[column][row].getPieceType() == ChessPiece.PieceType.KING && squares[column][row].getTeamColor() == color){
-                    return new ChessPosition(row, column);
+        for(int column = 0; column < 8; column++){
+            for(int row = 0; row < 8; row++){
+                if(squares[row][column] != null && squares[row][column].getPieceType() == ChessPiece.PieceType.KING && squares[row][column].getTeamColor() == color){
+                    //check to see if bug later.
+                    return new ChessPosition(row + 1, column  + 1);
                 }
             }
         }
