@@ -24,6 +24,9 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow() - 1][position.getColumn() -1] = piece;
     }
+    public void deletePiece(ChessPosition position){
+        squares[position.getRow() - 1][position.getColumn() - 1] = null;
+    }
 
     /**
      * Gets a chess piece on the chessboard
@@ -42,8 +45,8 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public ChessPosition getKing(ChessGame.TeamColor color){
-        for(int column = 0; column < 8; column++){
-            for(int row = 0; row < 8; row++){
+        for(int row = 0; row < 8; row++){
+            for(int column = 0; column < 8; column++){
                 if(squares[row][column] != null && squares[row][column].getPieceType() == ChessPiece.PieceType.KING && squares[row][column].getTeamColor() == color){
                     //check to see if bug later.
                     return new ChessPosition(row + 1, column  + 1);

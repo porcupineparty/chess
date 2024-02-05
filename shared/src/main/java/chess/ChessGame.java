@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -52,8 +53,33 @@ public class ChessGame {
         if(startPosition == null){
             return null;
         }
+        ChessPiece chessPiece = myChessBoard.getPiece(startPosition);
+        Collection<ChessMove> originalMoves = chessPiece.pieceMoves(myChessBoard, startPosition);
+        ChessPiece newPiece = myChessBoard.getPiece(startPosition);
+        Collection<ChessMove> newValidMoves = new ArrayList<>();
+        for(ChessMove move : originalMoves){
+            ChessBoard newChessBoard = deepCopyChessBoard(myChessBoard);
+            newChessBoard.addPiece(move.getEndPosition(), newPiece);
+            newChessBoard.deletePiece(move.getStartPosition());
+            if(!isBoardInCheck(newChessBoard, newPiece.getTeamColor())){
+                newValidMoves.add(move);
+            }
+        }
+        return newValidMoves;
+    }
 
-        return null;
+    private ChessBoard deepCopyChessBoard(ChessBoard original){
+        ChessBoard newBoard = new ChessBoard();
+        for(int i = 1; i < 9; i++){
+            for(int j = 1; j < 9; j++){
+                ChessPosition position = new ChessPosition(i,j);
+                ChessPiece originalPiece = original.getPiece(position);
+                if(originalPiece != null){
+                    newBoard.addPiece(position, originalPiece);
+                }
+            }
+        }
+        return newBoard;
     }
 
     /**
@@ -73,106 +99,138 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition kingPosition = myChessBoard.getKing(teamColor);
-        if(isCheckRowCol(kingPosition, teamColor)) return true;
-        if(isCheckDiagnol(kingPosition, teamColor)) return true;
-        if(isCheckKnight(kingPosition, teamColor)) return true;
-        return isCheckPawn(kingPosition, teamColor);
+        return isBoardInCheck(myChessBoard, teamColor);
     }
 
-    private boolean isCheckPawn(ChessPosition kingPosition, TeamColor teamColor) {
+    private boolean isBoardInCheck(ChessBoard chessBoard, TeamColor teamColor) {
+
+        ChessPosition kingPosition = chessBoard.getKing(teamColor);
+        if(isCheckRowCol(chessBoard, kingPosition, teamColor)) return true;
+        if(isCheckDiagonal(chessBoard, kingPosition, teamColor)) return true;
+        if(isCheckKnight(chessBoard, kingPosition, teamColor)) return true;
+        if(isKingCheck(chessBoard, kingPosition, teamColor)) return true;
+        return isCheckPawn(chessBoard, kingPosition, teamColor);
+    }
+
+    private boolean isKingCheck(ChessBoard chessBoard, ChessPosition kingPosition, TeamColor teamColor) {
+        return(kingSecondCheck(chessBoard, kingPosition, teamColor, 1, -1) ||
+                kingSecondCheck(chessBoard, kingPosition, teamColor, 1, 0) ||
+                kingSecondCheck(chessBoard, kingPosition, teamColor, 1, 1) ||
+                kingSecondCheck(chessBoard, kingPosition, teamColor, -1, -1) ||
+                kingSecondCheck(chessBoard, kingPosition, teamColor, -1, 0) ||
+                kingSecondCheck(chessBoard, kingPosition, teamColor, -1, 1) ||
+                kingSecondCheck(chessBoard, kingPosition, teamColor, 0, 1) ||
+                kingSecondCheck(chessBoard, kingPosition, teamColor, 0, -1));
+    }
+
+    private boolean isCheckPawn(ChessBoard chessBoard, ChessPosition kingPosition, TeamColor teamColor) {
         if(teamColor == TeamColor.WHITE){
-            return pawnCheck(kingPosition, teamColor, 1, 1) ||
-                    pawnCheck(kingPosition, teamColor, 1, -1);
+            return pawnCheck(chessBoard, kingPosition, teamColor, 1, 1) ||
+                    pawnCheck(chessBoard, kingPosition, teamColor, 1, -1);
 
         }
         else{
-            return pawnCheck(kingPosition, teamColor, -1, 1) ||
-                    pawnCheck(kingPosition, teamColor, -1, -1);
+            return pawnCheck(chessBoard, kingPosition, teamColor, -1, 1) ||
+                    pawnCheck(chessBoard, kingPosition, teamColor, -1, -1);
 
         }
     }
-    private boolean isCheckKnight(ChessPosition kingPosition, TeamColor teamColor) {
-        return (knightSecondCheck(kingPosition, teamColor, -2, 1) ||
-                knightSecondCheck(kingPosition, teamColor, -2, -1) ||
-                knightSecondCheck(kingPosition, teamColor, 2, 1) ||
-                knightSecondCheck(kingPosition, teamColor, 2, -1) ||
-                knightSecondCheck(kingPosition, teamColor, 1, 2) ||
-                knightSecondCheck(kingPosition, teamColor, 1, -2) ||
-                knightSecondCheck(kingPosition, teamColor, -1, 2) ||
-                knightSecondCheck(kingPosition, teamColor, -1, -2));
+    private boolean isCheckKnight(ChessBoard chessBoard, ChessPosition kingPosition, TeamColor teamColor) {
+        return (knightSecondCheck(chessBoard, kingPosition, teamColor, -2, 1) ||
+                knightSecondCheck(chessBoard, kingPosition, teamColor, -2, -1) ||
+                knightSecondCheck(chessBoard, kingPosition, teamColor, 2, 1) ||
+                knightSecondCheck(chessBoard, kingPosition, teamColor, 2, -1) ||
+                knightSecondCheck(chessBoard, kingPosition, teamColor, 1, 2) ||
+                knightSecondCheck(chessBoard, kingPosition, teamColor, 1, -2) ||
+                knightSecondCheck(chessBoard, kingPosition, teamColor, -1, 2) ||
+                knightSecondCheck(chessBoard, kingPosition, teamColor, -1, -2));
     }
-    private boolean isCheckDiagnol(ChessPosition kingPosition, TeamColor teamColor) {
-        return (isCheckDiagnolRec(kingPosition, teamColor, 1, 1) ||
-                isCheckDiagnolRec(kingPosition, teamColor, 1, -1) ||
-                isCheckDiagnolRec(kingPosition, teamColor, -1, 1) ||
-                isCheckDiagnolRec(kingPosition, teamColor, -1, -1));
+    private boolean isCheckDiagonal(ChessBoard chessBoard, ChessPosition kingPosition, TeamColor teamColor) {
+        return (isCheckDiagonalRec(chessBoard, kingPosition, teamColor, 1, 1) ||
+                isCheckDiagonalRec(chessBoard, kingPosition, teamColor, 1, -1) ||
+                isCheckDiagonalRec(chessBoard, kingPosition, teamColor, -1, 1) ||
+                isCheckDiagonalRec(chessBoard, kingPosition, teamColor, -1, -1));
     }
-    private boolean isCheckRowCol(ChessPosition kingPosition, TeamColor teamColor){
-        return (isCheckRowColRec(kingPosition, teamColor, 0, 1) ||
-                isCheckRowColRec(kingPosition, teamColor, 0, -1) ||
-                isCheckRowColRec(kingPosition, teamColor, 1, 0) ||
-                isCheckRowColRec(kingPosition, teamColor, -1, 0));
+    private boolean isCheckRowCol(ChessBoard chessBoard, ChessPosition kingPosition, TeamColor teamColor){
+        return (isCheckRowColRec(chessBoard, kingPosition, teamColor, 0, 1) ||
+                isCheckRowColRec(chessBoard, kingPosition, teamColor, 0, -1) ||
+                isCheckRowColRec(chessBoard, kingPosition, teamColor, 1, 0) ||
+                isCheckRowColRec(chessBoard, kingPosition, teamColor, -1, 0));
     }
-    private boolean pawnCheck(ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
+    private boolean kingSecondCheck(ChessBoard chessBoard, ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
         ChessPosition newPosition = new ChessPosition(nextPosition.getRow() + row, nextPosition.getColumn() + col);
         if(isPositionValid(newPosition)){
-            if(myChessBoard.getPiece(newPosition) == null){
+            if(chessBoard.getPiece(newPosition) == null){
                 return false;
             }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() != teamColor){
-                return myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.PAWN;
-
+            else if(chessBoard.getPiece(newPosition).getTeamColor() != teamColor){
+                return chessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.KING;
             }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() == teamColor){
-                return false;
-            }
-        }
-        return false;
-    }
-    private boolean knightSecondCheck(ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
-        ChessPosition newPosition = new ChessPosition(nextPosition.getRow() + row, nextPosition.getColumn() + col);
-        if(isPositionValid(newPosition)){
-            if(myChessBoard.getPiece(newPosition) == null){
-                return false;
-            }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() != teamColor){
-                return myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.KNIGHT;
-
-            }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() == teamColor){
+            else if(chessBoard.getPiece(newPosition).getTeamColor() == teamColor){
                 return false;
             }
         }
         return false;
     }
-    private boolean isCheckDiagnolRec(ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
+    private boolean pawnCheck(ChessBoard chessBoard, ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
         ChessPosition newPosition = new ChessPosition(nextPosition.getRow() + row, nextPosition.getColumn() + col);
         if(isPositionValid(newPosition)){
-            if(myChessBoard.getPiece(newPosition) == null){
-                return isCheckDiagnolRec(newPosition, teamColor, row, col);
+            if(chessBoard.getPiece(newPosition) == null){
+                return false;
             }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() != teamColor){
-                return myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.QUEEN || myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.BISHOP;
+            else if(chessBoard.getPiece(newPosition).getTeamColor() != teamColor){
+                return chessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.PAWN;
 
             }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() == teamColor){
+            else if(chessBoard.getPiece(newPosition).getTeamColor() == teamColor){
                 return false;
             }
         }
         return false;
     }
-    private boolean isCheckRowColRec(ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
+    private boolean knightSecondCheck(ChessBoard chessBoard, ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
         ChessPosition newPosition = new ChessPosition(nextPosition.getRow() + row, nextPosition.getColumn() + col);
         if(isPositionValid(newPosition)){
-            if(myChessBoard.getPiece(newPosition) == null){
-                return isCheckRowColRec(newPosition, teamColor,row, col);
+            if(chessBoard.getPiece(newPosition) == null){
+                return false;
             }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() != teamColor){
-                return myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.QUEEN || myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.ROOK;
+            else if(chessBoard.getPiece(newPosition).getTeamColor() != teamColor){
+                return chessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.KNIGHT;
 
             }
-            else if(myChessBoard.getPiece(newPosition).getTeamColor() == teamColor){
+            else if(chessBoard.getPiece(newPosition).getTeamColor() == teamColor){
+                return false;
+            }
+        }
+        return false;
+    }
+    private boolean isCheckDiagonalRec(ChessBoard chessBoard, ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
+        ChessPosition newPosition = new ChessPosition(nextPosition.getRow() + row, nextPosition.getColumn() + col);
+        if(isPositionValid(newPosition)){
+            if(chessBoard.getPiece(newPosition) == null){
+                return isCheckDiagonalRec(chessBoard, newPosition, teamColor, row, col);
+            }
+            else if(chessBoard.getPiece(newPosition).getTeamColor() != teamColor){
+                return chessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.QUEEN || myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.BISHOP;
+
+            }
+            else if(chessBoard.getPiece(newPosition).getTeamColor() == teamColor){
+                return false;
+            }
+        }
+        return false;
+    }
+    private boolean isCheckRowColRec(ChessBoard chessBoard, ChessPosition nextPosition, TeamColor teamColor, int row, int col) {
+        ChessPosition newPosition = new ChessPosition(nextPosition.getRow() + row, nextPosition.getColumn() + col);
+        if(isPositionValid(newPosition)){
+            if(chessBoard.getPiece(newPosition) == null){
+                return isCheckRowColRec(chessBoard, newPosition, teamColor,row, col);
+            }
+            else if(chessBoard.getPiece(newPosition).getTeamColor() != teamColor){
+                return chessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.QUEEN || myChessBoard.getPiece(newPosition).getPieceType() == ChessPiece.PieceType.ROOK;
+
+            }
+            else if(chessBoard.getPiece(newPosition).getTeamColor() == teamColor){
                 return false;
             }
         }
