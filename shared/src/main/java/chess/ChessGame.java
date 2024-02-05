@@ -12,7 +12,6 @@ public class ChessGame {
 
     private TeamColor teamTurn;
     private ChessBoard myChessBoard;
-    private ChessPosition kingPosition;
 
     public ChessGame() {
 
@@ -74,7 +73,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        kingPosition = myChessBoard.getKing(teamColor);
+        ChessPosition kingPosition = myChessBoard.getKing(teamColor);
         if(isCheckRowCol(kingPosition, teamColor)) return true;
         if(isCheckDiagnol(kingPosition, teamColor)) return true;
         if(isCheckKnight(kingPosition, teamColor)) return true;
