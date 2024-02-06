@@ -91,20 +91,29 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        Collection<ChessMove> allMoves = validMoves(move.getStartPosition());
-        boolean throwMove = true;
         if (myChessBoard.getPiece(move.getStartPosition()).getTeamColor() != getTeamTurn()) {
             throw new InvalidMoveException("It's not the turn of the team making the move");
         }
+        Collection<ChessMove> allMoves = validMoves(move.getStartPosition());
+        boolean throwMove = true;
+
         for(ChessMove goodMove : allMoves){
             if(goodMove.equals(move)){
                 ChessPiece newPiece = myChessBoard.getPiece(move.getStartPosition());
-                myChessBoard.addPiece(move.getEndPosition(), newPiece);
-                myChessBoard.deletePiece(move.getStartPosition());
-                throwMove = false;
-                break;
 
-
+                if((newPiece.getPieceType() == ChessPiece.PieceType.PAWN) && (move.getEndPosition().getRow() == 8 || move.getEndPosition().getRow() == 1)){
+                    ChessPiece.PieceType myPromotion = move.getPromotionPiece();
+                    myChessBoard.addPiece(move.getEndPosition(), new ChessPiece(myChessBoard.getPiece(move.getStartPosition()).getTeamColor(), myPromotion));
+                    myChessBoard.deletePiece(move.getStartPosition());
+                    throwMove = false;
+                    break;
+                }
+                else{
+                    myChessBoard.addPiece(move.getEndPosition(), newPiece);
+                    myChessBoard.deletePiece(move.getStartPosition());
+                    throwMove = false;
+                    break;
+                }
             }
         }
         if(throwMove){
