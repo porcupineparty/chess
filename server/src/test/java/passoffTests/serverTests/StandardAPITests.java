@@ -817,5 +817,4 @@ public class StandardAPITests {
         Assertions.assertFalse(result.message != null && result.message.toLowerCase(Locale.ROOT).contains("error"),
                 "Clear Result returned an error message");
     }
-
 }
