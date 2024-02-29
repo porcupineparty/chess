@@ -9,7 +9,6 @@ public class ClearService {
         this.dao = dao;
     }
     public void deleteDatabase() throws DataAccessException {
-        System.out.println("ClearService deleteDatabase method: I am here");
         dao.Clear();
     }
 }

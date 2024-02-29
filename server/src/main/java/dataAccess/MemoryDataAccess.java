@@ -4,15 +4,18 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MemoryDataAccess implements DataAccess{
     private Map<String, UserData> users = new HashMap<>();
     private Map<Integer, GameData> games = new HashMap<>();
     private Map<String, AuthData> tokens = new HashMap<>();
+    private AtomicInteger nextGameId = new AtomicInteger(1);
 
     @Override
     public void Clear() throws DataAccessException {
@@ -21,8 +24,11 @@ public class MemoryDataAccess implements DataAccess{
         tokens.clear();
     }
     @Override
-    public void CreateGame(GameData myGame) throws DataAccessException {
-        games.put(myGame.gameID(), myGame);
+    public GameData CreateGame(GameData myGame) throws DataAccessException {
+        int gameId = nextGameId.getAndIncrement();
+        GameData gameWithId = new GameData(gameId, myGame.whiteUsername(), myGame.blackUsername(), myGame.gameName(), myGame.implementation());
+        games.put(gameId, gameWithId);
+        return gameWithId;
     }
     @Override
     public void CreateUser(UserData myUser) throws DataAccessException {
@@ -32,12 +38,24 @@ public class MemoryDataAccess implements DataAccess{
     public void CreateAuth(AuthData myAuth) throws DataAccessException {
         tokens.put(myAuth.authToken(), myAuth);
     }
+
+
+
     @Override
-    public void updateGame(int gameId, String updatedGameData) throws DataAccessException {
-        games.remove(gameId);
-        Gson gson = new Gson();
-        GameData updateData = gson.fromJson(updatedGameData, GameData.class);
-        games.put(gameId, updateData);
+    public void updateGame(GameData game, String playerColor, String username) throws DataAccessException {
+        if ("WHITE".equals(playerColor) && game.whiteUsername() == null) {
+            GameData updateGame = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.implementation());
+            games.remove(game.gameID());
+            games.put(game.gameID(), updateGame);
+        } else if ("BLACK".equals(playerColor) && game.blackUsername() == null) {
+            GameData updateGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.implementation());
+            games.remove(game.gameID());
+            games.put(game.gameID(), updateGame);
+        } else if(playerColor == null){
+            GameData updateGame = new GameData(game.gameID(), game.whiteUsername(),  game.blackUsername(), game.gameName(), game.implementation());
+            games.remove(game.gameID());
+            games.put(game.gameID(), updateGame);
+        }
     }
     @Override
     public UserData getUser(String userId) throws DataAccessException {
@@ -52,7 +70,11 @@ public class MemoryDataAccess implements DataAccess{
         return games.get(gameID);
     }
     @Override
-    public String listGames() throws DataAccessException {
-        return new Gson().toJson(games);
+    public List<GameData> listGames() throws DataAccessException {
+        return new ArrayList<>(games.values());
+    }
+    @Override
+    public void deleteAuth(String authToken) throws DataAccessException {
+        tokens.remove(authToken);
     }
 }
