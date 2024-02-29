@@ -11,14 +11,10 @@ public class GameService {
     public GameService(MemoryDataAccess dao) {
         this.dao = dao;
     }
-    public GameData createGame(GameData newGame, int gameId) throws DataAccessException {
-        GameData myGame = dao.CreateGame(newGame);
-        return myGame;
+    public GameData createGame(GameData newGame) throws DataAccessException {
+        return dao.CreateGame(newGame);
     }
-    public GameData getGame(GameData myGame) throws DataAccessException {
-        GameData gottenGame = dao.getGame(myGame.gameID());
-        return gottenGame;
-    }
+
     public List<GameData> listGames() throws DataAccessException{
         return dao.listGames();
     }
@@ -31,7 +27,6 @@ public class GameService {
     }
 
     public GameData getGameById(int gameId) throws DataAccessException {
-        GameData gottenGame = dao.getGame(gameId);
-        return gottenGame;
+        return dao.getGame(gameId);
     }
 }

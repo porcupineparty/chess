@@ -20,8 +20,7 @@ public class UserService {
         return authData;
     }
     public UserData getUser(UserData user) throws DataAccessException {
-        UserData myUser = dao.getUser(user.username());
-        return myUser;
+        return dao.getUser(user.username());
     }
 
     public void logout(String authToken) throws DataAccessException {
@@ -31,13 +30,7 @@ public class UserService {
         }
     }
     public AuthData getAuth(String authToken) throws DataAccessException {
-        AuthData myAuth = dao.getAuth(authToken);
-        if(myAuth != null){
-            return myAuth;
-        }
-        else{
-            return null;
-        }
+        return dao.getAuth(authToken);
     }
     public void storeAuth(AuthData authData) throws DataAccessException {
         dao.CreateAuth(authData);

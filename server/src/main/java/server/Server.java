@@ -14,21 +14,21 @@ import service.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
-import dataAccess.DataAccess;
 
-import java.lang.reflect.Type;
+
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
-    private final MemoryDataAccess DAO = new MemoryDataAccess();
     private final UserService userService;
     private final GameService gameService;
     private final ClearService clearService;
-    private DataAccess dataAccess;
-    private AtomicInteger maxGameId = new AtomicInteger(0);
+
+    private final AtomicInteger maxGameId = new AtomicInteger(0);
 
     public Server() {
+        MemoryDataAccess DAO = new MemoryDataAccess();
         userService = new UserService(DAO);
         gameService = new GameService(DAO);
         clearService = new ClearService(DAO);
@@ -90,9 +90,7 @@ public class Server {
         res.status(200);
         return "{\"message\": \"Join successful\"}";
     }
-    private boolean isValidPlayerColor(String playerColor) {
-        return "WHITE".equals(playerColor) || "BLACK".equals(playerColor);
-    }
+
 
     private Object listGames(Request req, Response res) throws DataAccessException {
         String authToken = req.headers("Authorization");
@@ -108,8 +106,7 @@ public class Server {
         Map<String, List<GameData>> responseMap = new HashMap<>();
         responseMap.put("games", gamesList);
         Gson gson = new Gson();
-        String jsonString = gson.toJson(responseMap);
-        return jsonString;
+        return gson.toJson(responseMap);
     }
 
     private Object logout(Request req, Response res) throws DataAccessException {
@@ -140,8 +137,8 @@ public class Server {
             return res.body();
         }
         else{
-            int gameId = maxGameId.getAndIncrement();
-            GameData gameData = gameService.createGame(game, gameId);
+            maxGameId.getAndIncrement();
+            GameData gameData = gameService.createGame(game);
             return new Gson().toJson(gameData);
         }
     }
@@ -164,8 +161,7 @@ public class Server {
 
     private Object getUser(Request req, Response res) throws DataAccessException{
         var user = new Gson().fromJson(req.body(), UserData.class);
-        UserData userData = userService.getUser(user);
-        return userData;
+        return userService.getUser(user);
     }
 
 
