@@ -40,9 +40,6 @@ public class UserService {
 
     public AuthData getAuth(String authToken) throws DataAccessException {
         AuthData authData = dao.getAuth(authToken);
-        if(authData == null){
-            throw new DataAccessException("Auth Data Null");
-        }
         return authData;
     }
     public void storeAuth(AuthData authData) throws DataAccessException {

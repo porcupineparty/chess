@@ -61,7 +61,7 @@ public class ServiceTests {
         GameData newGame = new GameData(1, null, null, "myGame", null);
         GameData createdGame = gameService.createGame(newGame);
         GameData retrievedGame = gameService.getGameById(createdGame.gameID());
-        assertThrows(DataAccessException.class, () -> gameService.getGameById(-1));
+        assertNull(gameService.getGameById(-1));
         assertEquals(createdGame, retrievedGame);
     }
     @Test
@@ -96,7 +96,7 @@ public class ServiceTests {
         assertDoesNotThrow(() -> userService.logout(authData.authToken()));
 
 
-        assertThrows(DataAccessException.class, () -> userService.getAuth(authData.authToken()));
+        assertNull(userService.getAuth(authData.authToken()));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class ServiceTests {
     @Test
     public void testGetAuth() throws DataAccessException{
 
-        assertThrows(DataAccessException.class, () -> userService.getAuth("invalidAuthToken"));
+        assertNull(userService.getAuth("invalidAuthToken"));
 
         String authToken = "validAuthToken";
         AuthData authData = new AuthData(authToken, "myUser");

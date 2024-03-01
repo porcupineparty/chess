@@ -30,9 +30,7 @@ public class GameService {
     }
 
     public GameData getGameById(int gameId) throws DataAccessException {
-        if(dao.getGame(gameId) == null){
-            throw new DataAccessException("game ID does not exist");
-        }
+
         return dao.getGame(gameId);
     }
 }
