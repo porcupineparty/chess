@@ -12,6 +12,9 @@ public class GameService {
         this.dao = dao;
     }
     public GameData createGame(GameData newGame) throws DataAccessException {
+        if(newGame.gameName() == null){
+            throw new DataAccessException("No Game Name Specified");
+        }
         return dao.CreateGame(newGame);
     }
 
@@ -27,6 +30,9 @@ public class GameService {
     }
 
     public GameData getGameById(int gameId) throws DataAccessException {
+        if(dao.getGame(gameId) == null){
+            throw new DataAccessException("game ID does not exist");
+        }
         return dao.getGame(gameId);
     }
 }

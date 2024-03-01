@@ -4,6 +4,7 @@ import dataAccess.MemoryDataAccess;
 import model.AuthData;
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.util.UUID;
 
 
@@ -13,6 +14,10 @@ public class UserService {
         this.dao = dao;
     }
     public AuthData register(UserData user) throws DataAccessException {
+        if(user.username() == null || user.email() == null || user.password() == null){
+            throw new DataAccessException("Invalid Register Info");
+        }
+
         String authToken = UUID.randomUUID().toString();
         dao.CreateUser(user);
         AuthData authData = new AuthData(authToken, user.username());
@@ -28,9 +33,17 @@ public class UserService {
         if (myAuth != null) {
             dao.deleteAuth(authToken);
         }
+        else{
+            throw new DataAccessException("Error logging out");
+        }
     }
+
     public AuthData getAuth(String authToken) throws DataAccessException {
-        return dao.getAuth(authToken);
+        AuthData authData = dao.getAuth(authToken);
+        if(authData == null){
+            throw new DataAccessException("Auth Data Null");
+        }
+        return authData;
     }
     public void storeAuth(AuthData authData) throws DataAccessException {
         dao.CreateAuth(authData);
