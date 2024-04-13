@@ -58,7 +58,6 @@ public class Server {
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::clearDatabase);
         Spark.post("/user", this::registerUser);
-        Spark.get("/user", this::getUser);
         Spark.post("/session", this::loginUser);
         Spark.post("/game", this::createGame);
         Spark.delete("/session", this::logout);
@@ -183,10 +182,7 @@ public class Server {
         }
     }
 
-    private Object getUser(Request req, Response res) throws DataAccessException{
-        var user = new Gson().fromJson(req.body(), UserData.class);
-        return userService.getUser(user);
-    }
+
 
 
     private Object registerUser(Request req, Response res) throws DataAccessException{
