@@ -30,17 +30,17 @@ public class MySQLDataAccess implements DataAccess{
             }
 
             // Clear AUTH table
-            try (var clearAuth = connection.prepareStatement("DELETE FROM auth")) {
+            try (var clearAuth = connection.prepareStatement("DELETE FROM AUTH")) {
                 clearAuth.executeUpdate();
             }
 
             // Clear USER table
-            try (var clearUser = connection.prepareStatement("DELETE FROM user")) {
+            try (var clearUser = connection.prepareStatement("DELETE FROM USER")) {
                 clearUser.executeUpdate();
             }
 
             // Clear GAME table
-            try (var clearGame = connection.prepareStatement("DELETE FROM game")) {
+            try (var clearGame = connection.prepareStatement("DELETE FROM GAME")) {
                 clearGame.executeUpdate();
             }
 
@@ -61,7 +61,7 @@ public class MySQLDataAccess implements DataAccess{
     public GameData CreateGame(GameData myGame) throws DataAccessException {
         GameData gameWithID;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("INSERT INTO game (whiteusername, blackusername, gamename, gameid, implementation) VALUES (?, ?, ?, ?, ?)")) {
+             var statement = connection.prepareStatement("INSERT INTO GAME (whiteusername, blackusername, gamename, gameid, implementation) VALUES (?, ?, ?, ?, ?)")) {
             int gameId = nextGameId.getAndIncrement();
 
             statement.setString(1, myGame.whiteUsername());
@@ -97,7 +97,7 @@ public class MySQLDataAccess implements DataAccess{
         String hashedPassword = encoder.encode(myUser.password());
 
         try(var connection = DatabaseManager.getConnection();
-            var statement = connection.prepareStatement("INSERT INTO user (username, password, email) VALUES (?, ?, ?)")){
+            var statement = connection.prepareStatement("INSERT INTO USER (username, password, email) VALUES (?, ?, ?)")){
             statement.setString(1, myUser.username());
             statement.setString(2, hashedPassword);
             statement.setString(3, myUser.email());
@@ -116,7 +116,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void CreateAuth(AuthData myAuth) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("INSERT INTO auth (authtoken, username) VALUES (?, ?)")) {
+             var statement = connection.prepareStatement("INSERT INTO AUTH (authtoken, username) VALUES (?, ?)")) {
 
             statement.setString(1, myAuth.authToken());
             statement.setString(2, myAuth.username());
@@ -132,7 +132,7 @@ public class MySQLDataAccess implements DataAccess{
     public UserData getUser(String userId) throws DataAccessException {
         UserData userData = null;
         try (var connection = DatabaseManager.getConnection();
-        var statement = connection.prepareStatement("SELECT * FROM user WHERE username = ?")){
+        var statement = connection.prepareStatement("SELECT * FROM USER WHERE username = ?")){
             statement.setString(1, userId);
             try(var resultSet = statement.executeQuery()){
                 if (resultSet.next()){
@@ -156,7 +156,7 @@ public class MySQLDataAccess implements DataAccess{
         }
         AuthData authData = null;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM auth WHERE authtoken = ?")) {
+             var statement = connection.prepareStatement("SELECT * FROM AUTH WHERE authtoken = ?")) {
             statement.setString(1, authToken);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -176,7 +176,7 @@ public class MySQLDataAccess implements DataAccess{
     public GameData getGame(int gameID) throws DataAccessException {
         GameData gameData = null;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM game WHERE gameid = ?")) {
+             var statement = connection.prepareStatement("SELECT * FROM GAME WHERE gameid = ?")) {
             statement.setInt(1, gameID);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -204,7 +204,7 @@ public class MySQLDataAccess implements DataAccess{
     public List<GameData> listGames() throws DataAccessException {
         List<GameData> games = new ArrayList<>();
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM game")) {
+             var statement = connection.prepareStatement("SELECT * FROM GAME")) {
             try (var resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     // Retrieve game data from the result set
@@ -229,7 +229,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("DELETE FROM auth WHERE authtoken = ?")) {
+             var statement = connection.prepareStatement("DELETE FROM AUTH WHERE authtoken = ?")) {
 
             statement.setString(1, authToken);
 
@@ -248,13 +248,13 @@ public class MySQLDataAccess implements DataAccess{
         try (var connection = DatabaseManager.getConnection()) {
             // Update the game with the provided username based on playerColor
             if ("WHITE".equals(playerColor)) {
-                try (var statement = connection.prepareStatement("UPDATE game SET whiteusername = ? WHERE gameid = ?")) {
+                try (var statement = connection.prepareStatement("UPDATE GAME SET whiteusername = ? WHERE gameid = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());
                     statement.executeUpdate();
                 }
             } else if ("BLACK".equals(playerColor)) {
-                try (var statement = connection.prepareStatement("UPDATE game SET blackusername = ? WHERE gameid = ?")) {
+                try (var statement = connection.prepareStatement("UPDATE GAME SET blackusername = ? WHERE gameid = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());
                     statement.executeUpdate();

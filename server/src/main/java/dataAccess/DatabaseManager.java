@@ -50,9 +50,9 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
         final String[] createStatements = {
-                "CREATE TABLE IF NOT EXISTS user (username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, PRIMARY KEY (username), UNIQUE (email));",
-                "CREATE TABLE IF NOT EXISTS auth (authtoken VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL, PRIMARY KEY (authtoken), FOREIGN KEY (username) REFERENCES USER(username));",
-                "CREATE TABLE IF NOT EXISTS game (gameid INT NOT NULL AUTO_INCREMENT, whiteusername VARCHAR(255), blackusername VARCHAR(255), gamename VARCHAR(255) NOT NULL, implementation VARCHAR(2048), PRIMARY KEY (gameid));"
+                "CREATE TABLE IF NOT EXISTS USER (username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, PRIMARY KEY (username), UNIQUE (email));",
+                "CREATE TABLE IF NOT EXISTS AUTH (authtoken VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL, PRIMARY KEY (authtoken), FOREIGN KEY (username) REFERENCES USER(username));",
+                "CREATE TABLE IF NOT EXISTS GAME (gameid INT NOT NULL AUTO_INCREMENT, whiteusername VARCHAR(255), blackusername VARCHAR(255), gamename VARCHAR(255) NOT NULL, implementation VARCHAR(2048), PRIMARY KEY (gameid));"
         };
 
 
