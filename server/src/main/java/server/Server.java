@@ -27,7 +27,7 @@ public class Server {
     private UserService userService = null;
     private GameService gameService = null;
     private ClearService clearService = null;
-    private final AtomicInteger maxGameId = new AtomicInteger(0);
+    private final AtomicInteger maxGameId = new AtomicInteger(1);
 
     public Server()  {
 

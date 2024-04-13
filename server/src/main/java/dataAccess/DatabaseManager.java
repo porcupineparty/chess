@@ -50,10 +50,12 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
         final String[] createStatements = {
-                "CREATE TABLE IF NOT EXISTS AUTH (authToken VARCHAR(255) NOT NULL, PRIMARY KEY (authToken));",
-                "CREATE TABLE IF NOT EXISTS GAME (GAMEID INT NOT NULL AUTO_INCREMENT, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), gameName VARCHAR(255) NOT NULL, Implementation VARCHAR(255), PRIMARY KEY (GAMEID), UNIQUE (whiteUsername), UNIQUE (blackUsername));",
-                "CREATE TABLE IF NOT EXISTS USER (Username VARCHAR(255) NOT NULL, Password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, authToken VARCHAR(255), GAMEID INT, PRIMARY KEY (Username), FOREIGN KEY (authToken) REFERENCES AUTH(authToken), FOREIGN KEY (GAMEID) REFERENCES GAME(GAMEID), UNIQUE (email));"
+                "CREATE TABLE IF NOT EXISTS USER (Username VARCHAR(255) NOT NULL, Password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, PRIMARY KEY (Username), UNIQUE (email));",
+                "CREATE TABLE IF NOT EXISTS AUTH (authToken VARCHAR(255) NOT NULL, Username VARCHAR(255) NOT NULL, PRIMARY KEY (authToken), FOREIGN KEY (Username) REFERENCES USER(Username));",
+                "CREATE TABLE IF NOT EXISTS GAME (GAMEID INT NOT NULL AUTO_INCREMENT, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), gameName VARCHAR(255) NOT NULL, Implementation VARCHAR(255), PRIMARY KEY (GAMEID), UNIQUE (whiteUsername), UNIQUE (blackUsername));"
         };
+
+
         try (var conn = DatabaseManager.getConnection()) {
 
             for (var statement : createStatements) {
