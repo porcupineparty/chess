@@ -187,22 +187,28 @@ public class Server {
 
 
 
-    private Object registerUser(Request req, Response res) throws DataAccessException{
+    private Object registerUser(Request req, Response res) throws DataAccessException {
         var user = new Gson().fromJson(req.body(), UserData.class);
         UserData userData = userService.getUser(user);
-        if(userData != null && userData.username() != null){
+
+        // Check if userData itself is null before accessing its properties
+        if (userData != null && userData.username() != null) {
             res.status(403);
             res.body("{\"message\": \"Error: already taken\"}");
             return res.body();
         }
-        if(user.password() == null || user.email() == null || user.username() == null){
+
+        // Add null check for userData
+        if (userData == null || user.password() == null || user.email() == null || user.username() == null) {
             res.status(400);
             res.body("{\"message\": \"Error: bad request\"}");
             return res.body();
         }
+
         AuthData authData = userService.register(user);
         return new Gson().toJson(authData);
     }
+
 
     private Object clearDatabase(Request req, Response res) throws DataAccessException {
             clearService.deleteDatabase();
