@@ -15,9 +15,6 @@ public class UserService {
         this.dao = dao;
     }
     public AuthData register(UserData user) throws DataAccessException {
-        if(user.username() == null || user.email() == null || user.password() == null){
-            throw new DataAccessException("Invalid Register Info");
-        }
 
         String authToken = UUID.randomUUID().toString();
         dao.CreateUser(user);
