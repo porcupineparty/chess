@@ -8,6 +8,7 @@ import model.UserData;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -162,13 +163,56 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        return null;
+        GameData gameData = null;
+        try (var connection = DatabaseManager.getConnection();
+             var statement = connection.prepareStatement("SELECT * FROM GAME WHERE GAMEID = ?")) {
+            statement.setInt(1, gameID);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    // Retrieve game data from the result set
+                    String whiteUsername = resultSet.getString("whiteUsername");
+                    String blackUsername = resultSet.getString("blackUsername");
+                    String gameName = resultSet.getString("gameName");
+
+                    // I don't think I need the implementation because it is already stored.
+                    //NOTICE make sure this is the case later on.
+
+                    // Create a new GameData object with the retrieved data
+                    gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, null); // Replace null with the chess implementation
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to get game: " + e.getMessage());
+        }
+        return gameData;
     }
+
 
     @Override
     public List<GameData> listGames() throws DataAccessException {
-        return null;
+        List<GameData> games = new ArrayList<>();
+        try (var connection = DatabaseManager.getConnection();
+             var statement = connection.prepareStatement("SELECT * FROM GAME")) {
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    // Retrieve game data from the result set
+                    int gameID = resultSet.getInt("GAMEID");
+                    String whiteUsername = resultSet.getString("whiteUsername");
+                    String blackUsername = resultSet.getString("blackUsername");
+                    String gameName = resultSet.getString("gameName");
+                    // You may need to parse and retrieve other data like the chess implementation
+
+                    // Create a new GameData object with the retrieved data
+                    GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, null); // Replace null with the chess implementation
+                    games.add(gameData);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to list games: " + e.getMessage());
+        }
+        return games;
     }
+
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
@@ -186,24 +230,43 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void updateGame(GameData game, String playerColor, String username) throws DataAccessException {
-        try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("UPDATE GAME SET whiteUsername = CASE WHEN ? = 'WHITE' THEN ? ELSE whiteUsername END, blackUsername = CASE WHEN ? = 'BLACK' THEN ? ELSE blackUsername END WHERE GAMEID = ?")) {
+        try (var connection = DatabaseManager.getConnection()) {
+            // Check if any username is present in either whiteUsername or blackUsername column
+            try (var checkStatement = connection.prepareStatement("SELECT whiteUsername, blackUsername FROM GAME WHERE GAMEID = ?")) {
+                checkStatement.setInt(1, game.gameID());
+                try (var resultSet = checkStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        String whiteUsername = resultSet.getString("whiteUsername");
+                        String blackUsername = resultSet.getString("blackUsername");
+                        // If either whiteUsername or blackUsername is not null, skip the update
+                        if ((whiteUsername != null && !whiteUsername.isEmpty()) || (blackUsername != null && !blackUsername.isEmpty())) {
+                            return; // Skip update
+                        }
+                    }
+                }
+            }
 
-            // Set the parameters based on player color
-            statement.setString(1, playerColor);
-            statement.setString(2, ("WHITE".equalsIgnoreCase(playerColor)) ? username : game.whiteUsername());
-            statement.setString(3, playerColor);
-            statement.setString(4, ("BLACK".equalsIgnoreCase(playerColor)) ? username : game.blackUsername());
-
-            // Set the gameId parameter
-            statement.setInt(5, game.gameID());
-
-            // Execute the update
-            statement.executeUpdate();
+            // If we reach here, it means both whiteUsername and blackUsername are null or empty, proceed with the update
+            if ("WHITE".equals(playerColor)) {
+                try (var statement = connection.prepareStatement("UPDATE GAME SET whiteUsername = ? WHERE GAMEID = ?")) {
+                    statement.setString(1, username);
+                    statement.setInt(2, game.gameID());
+                    statement.executeUpdate();
+                }
+            } else if ("BLACK".equals(playerColor)) {
+                try (var statement = connection.prepareStatement("UPDATE GAME SET blackUsername = ? WHERE GAMEID = ?")) {
+                    statement.setString(1, username);
+                    statement.setInt(2, game.gameID());
+                    statement.executeUpdate();
+                }
+            }
         } catch (SQLException e) {
             throw new DataAccessException("Error executing update: " + e.getMessage());
         }
     }
+
+
+
 
 
 }
