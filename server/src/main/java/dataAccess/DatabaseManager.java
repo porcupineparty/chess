@@ -66,7 +66,6 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             throw new RuntimeException(String.format("Unable to configure database: %s", ex.getMessage()));
         }
-
     }
 
 
