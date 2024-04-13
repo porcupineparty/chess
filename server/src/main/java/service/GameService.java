@@ -1,5 +1,6 @@
 package service;
 
+import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
 import model.GameData;
@@ -7,8 +8,8 @@ import model.GameData;
 import java.util.List;
 
 public class GameService {
-    private final MemoryDataAccess dao;
-    public GameService(MemoryDataAccess dao) {
+    private final DataAccess dao;
+    public GameService(DataAccess dao) {
         this.dao = dao;
     }
     public GameData createGame(GameData newGame) throws DataAccessException {

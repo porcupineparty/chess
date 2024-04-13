@@ -1,4 +1,5 @@
 package service;
+import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
 import model.AuthData;
@@ -9,8 +10,8 @@ import java.util.UUID;
 
 
 public class UserService {
-    private final MemoryDataAccess dao;
-    public UserService(MemoryDataAccess dao) {
+    private final DataAccess dao;
+    public UserService(DataAccess dao) {
         this.dao = dao;
     }
     public AuthData register(UserData user) throws DataAccessException {

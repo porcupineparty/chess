@@ -3,8 +3,10 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
+import dataAccess.MySQLDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -14,6 +16,7 @@ import service.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
+import dataAccess.DataAccessException;
 
 
 
@@ -21,17 +24,29 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
-    private final UserService userService;
-    private final GameService gameService;
-    private final ClearService clearService;
-
+    private UserService userService = null;
+    private GameService gameService = null;
+    private ClearService clearService = null;
     private final AtomicInteger maxGameId = new AtomicInteger(0);
 
-    public Server() {
-        MemoryDataAccess DAO = new MemoryDataAccess();
-        userService = new UserService(DAO);
-        gameService = new GameService(DAO);
-        clearService = new ClearService(DAO);
+    public Server()  {
+
+
+        try {
+            // Attempt to initialize DataAccess and services
+            DataAccess DAO = new MySQLDataAccess();
+            userService = new UserService(DAO);
+            gameService = new GameService(DAO);
+            clearService = new ClearService(DAO);
+
+        } catch (Exception e) {
+            // Handle any exceptions that occur during initialization
+            // For example, log the exception and gracefully handle the error
+            System.out.print(e.getMessage());
+            // You can also throw a custom exception or handle the error in a different way
+        }
+
+
     }
 
     public int run(int desiredPort) {
@@ -48,11 +63,16 @@ public class Server {
         Spark.delete("/session", this::logout);
         Spark.get("/game", this::listGames);
         Spark.put("/game", this::joinGame);
+        Spark.exception(DataAccessException.class, this::exceptionHandler);
 
 
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    private void exceptionHandler(DataAccessException ex, Request req, Response res) {
+        System.out.print(ex.getMessage());
     }
 
     private Object joinGame(Request req, Response res) throws DataAccessException {
