@@ -141,7 +141,8 @@ public class Server {
         }
         userService.logout(authToken);
         res.status(200);
-        return "{\"message\": \"Logout successful\"}";
+        res.body("{\"message\": \"Logout successful\"}");
+        return res.body();
     }
 
     private Object createGame(Request req, Response res) throws DataAccessException {
