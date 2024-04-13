@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MySQLDataAccess implements DataAccess{
@@ -77,7 +78,7 @@ public class MySQLDataAccess implements DataAccess{
             // Execute the update
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException("Error executing update: " + e.getMessage());
+            throw new DataAccessException("Error executing create game: " + e.getMessage());
         }
         return gameWithID;
     }
@@ -98,7 +99,7 @@ public class MySQLDataAccess implements DataAccess{
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DataAccessException("Error executing update: " + e.getMessage());
+            throw new DataAccessException("Error executing create user: " + e.getMessage());
         }
 
     }
@@ -116,7 +117,7 @@ public class MySQLDataAccess implements DataAccess{
             // Execute the update
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException("Error executing update: " + e.getMessage());
+            throw new DataAccessException("Error executing create auth: " + e.getMessage());
         }
     }
 
@@ -169,7 +170,7 @@ public class MySQLDataAccess implements DataAccess{
             statement.setInt(1, gameID);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    // Retrieve game data from the result set
+
                     String whiteUsername = resultSet.getString("whiteUsername");
                     String blackUsername = resultSet.getString("blackUsername");
                     String gameName = resultSet.getString("gameName");
@@ -177,7 +178,6 @@ public class MySQLDataAccess implements DataAccess{
                     // I don't think I need the implementation because it is already stored.
                     //NOTICE make sure this is the case later on.
 
-                    // Create a new GameData object with the retrieved data
                     gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, null); // Replace null with the chess implementation
                 }
             }
@@ -200,8 +200,8 @@ public class MySQLDataAccess implements DataAccess{
                     String whiteUsername = resultSet.getString("whiteUsername");
                     String blackUsername = resultSet.getString("blackUsername");
                     String gameName = resultSet.getString("gameName");
-                    // You may need to parse and retrieve other data like the chess implementation
-
+                    String implementation = resultSet.getString("implementation");
+                    //look at the implementation in the future.
                     // Create a new GameData object with the retrieved data
                     GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, null); // Replace null with the chess implementation
                     games.add(gameData);
@@ -231,22 +231,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void updateGame(GameData game, String playerColor, String username) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection()) {
-            // Check if any username is present in either whiteUsername or blackUsername column
-            try (var checkStatement = connection.prepareStatement("SELECT whiteUsername, blackUsername FROM GAME WHERE GAMEID = ?")) {
-                checkStatement.setInt(1, game.gameID());
-                try (var resultSet = checkStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        String whiteUsername = resultSet.getString("whiteUsername");
-                        String blackUsername = resultSet.getString("blackUsername");
-                        // If either whiteUsername or blackUsername is not null, skip the update
-                        if ((whiteUsername != null && !whiteUsername.isEmpty()) || (blackUsername != null && !blackUsername.isEmpty())) {
-                            return; // Skip update
-                        }
-                    }
-                }
-            }
-
-            // If we reach here, it means both whiteUsername and blackUsername are null or empty, proceed with the update
+            // Update the game with the provided username based on playerColor
             if ("WHITE".equals(playerColor)) {
                 try (var statement = connection.prepareStatement("UPDATE GAME SET whiteUsername = ? WHERE GAMEID = ?")) {
                     statement.setString(1, username);
@@ -264,6 +249,7 @@ public class MySQLDataAccess implements DataAccess{
             throw new DataAccessException("Error executing update: " + e.getMessage());
         }
     }
+
 
 
 
