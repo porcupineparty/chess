@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class DatabaseTests {
 
-    private MySQLDataAccess dao;
+
     DataAccess DAO = new MySQLDataAccess();
 
     public DatabaseTests() throws DataAccessException {
@@ -34,7 +34,8 @@ public class DatabaseTests {
 
         try {
             DAO.Clear();
-            dao = new MySQLDataAccess(); // Initialize dao here
+
+
         } catch (DataAccessException e) {
 
             System.out.println("Failed to clear the database: " + e.getMessage());
@@ -49,9 +50,9 @@ public class DatabaseTests {
         String email = "test@example.com";
         UserData user = new UserData(username, password, email);
 
-        dao.CreateUser(user);
+        DAO.CreateUser(user);
 
-        UserData retrievedUser = dao.getUser(username);
+        UserData retrievedUser = DAO.getUser(username);
         assertNotNull(retrievedUser);
         assertEquals(username, retrievedUser.username());
         assertEquals(email, retrievedUser.email());
@@ -66,7 +67,7 @@ public class DatabaseTests {
         UserData user = new UserData(username, password, email);
 
 
-        assertThrows(DataAccessException.class, () -> dao.CreateUser(user));
+        assertThrows(DataAccessException.class, () -> DAO.CreateUser(user));
     }
 
     @Test
@@ -77,11 +78,11 @@ public class DatabaseTests {
 
 
         assertDoesNotThrow(() -> {
-            dao.CreateUser(user1);
-            dao.CreateUser(user2);
+            DAO.CreateUser(user1);
+            DAO.CreateUser(user2);
         });
 
-        assertDoesNotThrow(() -> dao.Clear());
+        assertDoesNotThrow(() -> DAO.Clear());
 
     }
 
@@ -100,13 +101,13 @@ public class DatabaseTests {
         GameData game = new GameData(1, "chimichanga", "username", "myGame", chessGame);
 
 
-        dao.CreateGame(game);
+        DAO.CreateGame(game);
 
-        System.out.print(dao.listGames());
+        System.out.print(DAO.listGames());
         System.out.print(game.implementation().toString());
 
 
-        GameData retrievedGame = dao.getGame(game.gameID());
+        GameData retrievedGame = DAO.getGame(game.gameID());
         System.out.print(retrievedGame.implementation().getBoard().toString());
 
         assertNotNull(retrievedGame.implementation()); // Ensure the ChessGame implementation is not null
@@ -139,15 +140,15 @@ public class DatabaseTests {
         chessGame1.makeMove(myMove);
 
 
-        dao.CreateGame(game);
-        dao.CreateGame(game2);
+        DAO.CreateGame(game);
+        DAO.CreateGame(game2);
 
-        System.out.print(dao.listGames());
+        System.out.print(DAO.listGames());
         System.out.print(game.implementation().toString());
 
 
-        GameData retrievedGame1 = dao.getGame(1);
-        GameData retrievedGame2 = dao.getGame(2);
+        GameData retrievedGame1 = DAO.getGame(1);
+        GameData retrievedGame2 = DAO.getGame(2);
 
         assertNotNull(retrievedGame1.implementation()); // Ensure the ChessGame implementation is not null
         assertNotNull(retrievedGame2.implementation()); // Ensure the ChessGame implementation is not null
@@ -165,13 +166,13 @@ public class DatabaseTests {
 
 
         GameData game = new GameData(1, "chimichanga", null, "myGame", chessGame);
-        dao.CreateGame(game);
+        DAO.CreateGame(game);
 
 
-        dao.updateGame(game, "BLACK", "viewer");
+        DAO.updateGame(game, "BLACK", "viewer");
 
 
-        GameData retrievedGame = dao.getGame(1);
+        GameData retrievedGame = DAO.getGame(1);
 
         assertEquals("viewer", retrievedGame.blackUsername());
     }
@@ -186,13 +187,13 @@ public class DatabaseTests {
 
 
         GameData game = new GameData(1, "chimichanga", null, "myGame", chessGame);
-        dao.CreateGame(game);
+        DAO.CreateGame(game);
 
 
-        assertThrows(DataAccessException.class, () -> dao.updateGame(game, "BLACK", null));
+        assertThrows(DataAccessException.class, () -> DAO.updateGame(game, "BLACK", null));
 
 
-        GameData retrievedGame = dao.getGame(1);
+        GameData retrievedGame = DAO.getGame(1);
         assertNull(retrievedGame.blackUsername());
     }
     @Test
@@ -201,14 +202,14 @@ public class DatabaseTests {
         String authToken = "randomAuthToken";
         String username = "testUser";
         UserData user = new UserData(username, "password", "email");
-        dao.CreateUser(user);
+        DAO.CreateUser(user);
 
 
         AuthData authData = new AuthData(authToken, username);
-        dao.CreateAuth(authData);
+        DAO.CreateAuth(authData);
 
 
-        AuthData retrievedAuth = dao.getAuth(authToken);
+        AuthData retrievedAuth = DAO.getAuth(authToken);
         assertNotNull(retrievedAuth);
         assertEquals(authToken, retrievedAuth.authToken());
         assertEquals(username, retrievedAuth.username());
@@ -222,7 +223,7 @@ public class DatabaseTests {
 
         assertThrows(DataAccessException.class, () -> {
             AuthData authData = new AuthData(authToken, username);
-            dao.CreateAuth(authData);
+            DAO.CreateAuth(authData);
         });
     }
 
@@ -232,7 +233,7 @@ public class DatabaseTests {
         String authToken = null;
 
 
-        assertThrows(DataAccessException.class, () -> dao.getAuth(authToken));
+        assertThrows(DataAccessException.class, () -> DAO.getAuth(authToken));
     }
     @Test
     public void testGetAuthPositive() throws DataAccessException {
@@ -240,12 +241,12 @@ public class DatabaseTests {
         String authToken = "randomAuthToken";
         String username = "testUser";
         UserData user = new UserData("testUser", "password", "email");
-        dao.CreateUser(user);
+        DAO.CreateUser(user);
         AuthData authData = new AuthData(authToken, username);
-        dao.CreateAuth(authData);
+        DAO.CreateAuth(authData);
 
 
-        AuthData retrievedAuth = dao.getAuth(authToken);
+        AuthData retrievedAuth = DAO.getAuth(authToken);
 
 
         assertNotNull(retrievedAuth);
@@ -257,10 +258,10 @@ public class DatabaseTests {
 
         ChessGame chessGame = new ChessGame();
         GameData game = new GameData(1, "chimichanga", "username", "myGame", chessGame);
-        dao.CreateGame(game);
+        DAO.CreateGame(game);
 
 
-        GameData retrievedGame = dao.getGame(1);
+        GameData retrievedGame = DAO.getGame(1);
 
 
         assertNotNull(retrievedGame);
@@ -272,7 +273,7 @@ public class DatabaseTests {
         int nonExistentGameID = 999;
 
 
-        assertNull(dao.getGame(nonExistentGameID));
+        assertNull(DAO.getGame(nonExistentGameID));
     }
 
     @Test
@@ -281,11 +282,11 @@ public class DatabaseTests {
         GameData game1 = new GameData(1, "whiteUser1", "blackUser1", "Game1", null);
         GameData game2 = new GameData(2, "whiteUser2", "blackUser2", "Game2", null);
 
-        dao.CreateGame(game1);
-        dao.CreateGame(game2);
+        DAO.CreateGame(game1);
+        DAO.CreateGame(game2);
 
 
-        var games = dao.listGames();
+        var games = DAO.listGames();
 
         assertNotNull(games);
         assertEquals(2, games.size());
@@ -295,7 +296,7 @@ public class DatabaseTests {
     @Test
     public void testListGamesNegative() throws DataAccessException {
 
-        List<GameData> games = dao.listGames();
+        List<GameData> games = DAO.listGames();
         assertNotNull(games);
         assertTrue(games.isEmpty());
     }
@@ -304,8 +305,8 @@ public class DatabaseTests {
 
         String nonexistentAuthToken = "nonexistentAuthToken";
 
-       dao.deleteAuth(nonexistentAuthToken);
-        AuthData retrievedAuth = dao.getAuth(nonexistentAuthToken);
+       DAO.deleteAuth(nonexistentAuthToken);
+        AuthData retrievedAuth = DAO.getAuth(nonexistentAuthToken);
         assertNull(retrievedAuth);
     }
     @Test
@@ -313,38 +314,38 @@ public class DatabaseTests {
 
         String authToken = "randomAuthToken";
         String username = "testUser";
-        dao.CreateUser(new UserData(username, "password", "email"));
+        DAO.CreateUser(new UserData(username, "password", "email"));
         AuthData authData = new AuthData(authToken, username);
-        dao.CreateAuth(authData);
+        DAO.CreateAuth(authData);
 
-        dao.deleteAuth(authToken);
+        DAO.deleteAuth(authToken);
 
-        assertNull(dao.getAuth(authToken));
+        assertNull(DAO.getAuth(authToken));
     }
     @Test
     public void testCreateGameNegativeNullParameters() {
         GameData game = new GameData(1, null, null, null, null);
-        assertThrows(DataAccessException.class, () -> dao.CreateGame(game));
+        assertThrows(DataAccessException.class, () -> DAO.CreateGame(game));
     }
 
     @Test
     public void testUpdateGamePositive() throws DataAccessException {
         GameData game = new GameData(1, "whiteUser", null, "Game1", null);
-        dao.CreateGame(game);
+        DAO.CreateGame(game);
 
-        dao.updateGame(game, "BLACK", "blackUser");
-        GameData updatedGame = dao.getGame(1);
+        DAO.updateGame(game, "BLACK", "blackUser");
+        GameData updatedGame = DAO.getGame(1);
 
         assertEquals("blackUser", updatedGame.blackUsername());
     }
     @Test
     public void testUpdateGameNegativeNullParameters() {
         GameData game = new GameData(1, "whiteUser", null, "Game1", null);
-        assertThrows(DataAccessException.class, () -> dao.updateGame(game, null, null));
+        assertThrows(DataAccessException.class, () -> DAO.updateGame(game, null, null));
     }
     @Test
     public void testJoinGameNegativeNullParameters() {
-        assertThrows(DataAccessException.class, () -> dao.updateGame(null, null, null));
+        assertThrows(DataAccessException.class, () -> DAO.updateGame(null, null, null));
     }
     @Test
     public void testCreateUserNegativeDuplicateUsername() throws DataAccessException {
@@ -354,11 +355,11 @@ public class DatabaseTests {
         UserData existingUser = new UserData(username, password, email);
 
 
-        dao.CreateUser(existingUser);
+        DAO.CreateUser(existingUser);
 
 
         UserData newUser = new UserData(username, "newPassword", "new@example.com");
-        assertThrows(DataAccessException.class, () -> dao.CreateUser(newUser));
+        assertThrows(DataAccessException.class, () -> DAO.CreateUser(newUser));
     }
 
 
