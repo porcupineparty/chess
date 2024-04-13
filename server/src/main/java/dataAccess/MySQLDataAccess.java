@@ -61,7 +61,7 @@ public class MySQLDataAccess implements DataAccess{
     public GameData CreateGame(GameData myGame) throws DataAccessException {
         GameData gameWithID;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("INSERT INTO GAME (whiteUsername, blackUsername, gameName, gameID, Implementation) VALUES (?, ?, ?, ?, ?)")) {
+             var statement = connection.prepareStatement("INSERT INTO game (whiteusername, blackusername, gamename, gameid, implementation) VALUES (?, ?, ?, ?, ?)")) {
             int gameId = nextGameId.getAndIncrement();
 
             statement.setString(1, myGame.whiteUsername());
@@ -116,7 +116,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void CreateAuth(AuthData myAuth) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("INSERT INTO auth (authToken, Username) VALUES (?, ?)")) {
+             var statement = connection.prepareStatement("INSERT INTO auth (authtoken, username) VALUES (?, ?)")) {
 
             statement.setString(1, myAuth.authToken());
             statement.setString(2, myAuth.username());
@@ -156,11 +156,11 @@ public class MySQLDataAccess implements DataAccess{
         }
         AuthData authData = null;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM auth WHERE authToken = ?")) {
+             var statement = connection.prepareStatement("SELECT * FROM auth WHERE authtoken = ?")) {
             statement.setString(1, authToken);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    var retrievedAuthToken = resultSet.getString("authToken");
+                    var retrievedAuthToken = resultSet.getString("authtoken");
                     var username = resultSet.getString("username");
 
                     authData = new AuthData(retrievedAuthToken, username);
@@ -176,16 +176,16 @@ public class MySQLDataAccess implements DataAccess{
     public GameData getGame(int gameID) throws DataAccessException {
         GameData gameData = null;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM game WHERE gameID = ?")) {
+             var statement = connection.prepareStatement("SELECT * FROM game WHERE gameid = ?")) {
             statement.setInt(1, gameID);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    String whiteUsername = resultSet.getString("whiteUsername");
-                    String blackUsername = resultSet.getString("blackUsername");
-                    String gameName = resultSet.getString("gameName");
+                    String whiteUsername = resultSet.getString("whiteusername");
+                    String blackUsername = resultSet.getString("blackusername");
+                    String gameName = resultSet.getString("gamename");
 
                     // Deserialize the implementation from JSON
-                    String implementationJson = resultSet.getString("Implementation");
+                    String implementationJson = resultSet.getString("implementation");
                     Gson gson = new Gson();
                     ChessGame implementation = gson.fromJson(implementationJson, ChessGame.class);
 
@@ -208,11 +208,11 @@ public class MySQLDataAccess implements DataAccess{
             try (var resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     // Retrieve game data from the result set
-                    int gameID = resultSet.getInt("gameID");
-                    String whiteUsername = resultSet.getString("whiteUsername");
-                    String blackUsername = resultSet.getString("blackUsername");
-                    String gameName = resultSet.getString("gameName");
-                    String implementation = resultSet.getString("Implementation");
+                    int gameID = resultSet.getInt("gameid");
+                    String whiteUsername = resultSet.getString("whiteusername");
+                    String blackUsername = resultSet.getString("blackusername");
+                    String gameName = resultSet.getString("gamename");
+                    String implementation = resultSet.getString("implementation");
                     //look at the implementation in the future.
                     // Create a new GameData object with the retrieved data
                     GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, null); // Replace null with the chess implementation
@@ -229,7 +229,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("DELETE FROM auth WHERE authToken = ?")) {
+             var statement = connection.prepareStatement("DELETE FROM auth WHERE authtoken = ?")) {
 
             statement.setString(1, authToken);
 
@@ -248,13 +248,13 @@ public class MySQLDataAccess implements DataAccess{
         try (var connection = DatabaseManager.getConnection()) {
             // Update the game with the provided username based on playerColor
             if ("WHITE".equals(playerColor)) {
-                try (var statement = connection.prepareStatement("UPDATE game SET whiteUsername = ? WHERE gameID = ?")) {
+                try (var statement = connection.prepareStatement("UPDATE game SET whiteusername = ? WHERE gameid = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());
                     statement.executeUpdate();
                 }
             } else if ("BLACK".equals(playerColor)) {
-                try (var statement = connection.prepareStatement("UPDATE game SET blackUsername = ? WHERE gameID = ?")) {
+                try (var statement = connection.prepareStatement("UPDATE game SET blackusername = ? WHERE gameid = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());
                     statement.executeUpdate();

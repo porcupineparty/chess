@@ -51,8 +51,8 @@ public class DatabaseManager {
         }
         final String[] createStatements = {
                 "CREATE TABLE IF NOT EXISTS user (username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, PRIMARY KEY (username), UNIQUE (email));",
-                "CREATE TABLE IF NOT EXISTS auth (authToken VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL, PRIMARY KEY (authToken), FOREIGN KEY (username) REFERENCES USER(username));",
-                "CREATE TABLE IF NOT EXISTS game (gameID INT NOT NULL AUTO_INCREMENT, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), gameName VARCHAR(255) NOT NULL, Implementation VARCHAR(2048), PRIMARY KEY (gameID));"
+                "CREATE TABLE IF NOT EXISTS auth (authtoken VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL, PRIMARY KEY (authtoken), FOREIGN KEY (username) REFERENCES USER(username));",
+                "CREATE TABLE IF NOT EXISTS game (gameid INT NOT NULL AUTO_INCREMENT, whiteusername VARCHAR(255), blackusername VARCHAR(255), gamename VARCHAR(255) NOT NULL, implementation VARCHAR(2048), PRIMARY KEY (gameid));"
         };
 
 
