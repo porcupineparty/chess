@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -91,11 +93,13 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void CreateUser(UserData myUser) throws DataAccessException {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(myUser.password());
 
         try(var connection = DatabaseManager.getConnection();
             var statement = connection.prepareStatement("INSERT INTO user (username, password, email) VALUES (?, ?, ?)")){
             statement.setString(1, myUser.username());
-            statement.setString(2, myUser.password());
+            statement.setString(2, hashedPassword);
             statement.setString(3, myUser.email());
 
             // Execute the update

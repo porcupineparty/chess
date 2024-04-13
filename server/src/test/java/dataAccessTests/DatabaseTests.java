@@ -54,7 +54,6 @@ public class DatabaseTests {
         UserData retrievedUser = dao.getUser(username);
         assertNotNull(retrievedUser);
         assertEquals(username, retrievedUser.username());
-        assertEquals(password, retrievedUser.password());
         assertEquals(email, retrievedUser.email());
     }
 
@@ -322,13 +321,45 @@ public class DatabaseTests {
 
         assertNull(dao.getAuth(authToken));
     }
+    @Test
+    public void testCreateGameNegativeNullParameters() {
+        GameData game = new GameData(1, null, null, null, null);
+        assertThrows(DataAccessException.class, () -> dao.CreateGame(game));
+    }
+
+    @Test
+    public void testUpdateGamePositive() throws DataAccessException {
+        GameData game = new GameData(1, "whiteUser", null, "Game1", null);
+        dao.CreateGame(game);
+
+        dao.updateGame(game, "BLACK", "blackUser");
+        GameData updatedGame = dao.getGame(1);
+
+        assertEquals("blackUser", updatedGame.blackUsername());
+    }
+    @Test
+    public void testUpdateGameNegativeNullParameters() {
+        GameData game = new GameData(1, "whiteUser", null, "Game1", null);
+        assertThrows(DataAccessException.class, () -> dao.updateGame(game, null, null));
+    }
+    @Test
+    public void testJoinGameNegativeNullParameters() {
+        assertThrows(DataAccessException.class, () -> dao.updateGame(null, null, null));
+    }
+    @Test
+    public void testCreateUserNegativeDuplicateUsername() throws DataAccessException {
+        String username = "existingUser";
+        String password = "testPassword";
+        String email = "test@example.com";
+        UserData existingUser = new UserData(username, password, email);
 
 
+        dao.CreateUser(existingUser);
 
 
-
-
-
+        UserData newUser = new UserData(username, "newPassword", "new@example.com");
+        assertThrows(DataAccessException.class, () -> dao.CreateUser(newUser));
+    }
 
 
 

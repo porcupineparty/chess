@@ -10,6 +10,7 @@ import dataAccess.MySQLDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -165,8 +166,11 @@ public class Server {
 
     private Object loginUser(Request req, Response res) throws DataAccessException{
         var user = new Gson().fromJson(req.body(), UserData.class);
+
         UserData userData = userService.getUser(user);
-        if(userData != null && Objects.equals(userData.username(), user.username()) && Objects.equals(userData.password(), user.password())){
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        if(userData != null && encoder.matches(user.password(), userData.password()) && Objects.equals(userData.username(), user.username())){
             String authToken = UUID.randomUUID().toString();
             AuthData authData = new AuthData(authToken, user.username());
             userService.storeAuth(authData);
