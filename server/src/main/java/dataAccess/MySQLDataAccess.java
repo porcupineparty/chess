@@ -30,17 +30,17 @@ public class MySQLDataAccess implements DataAccess{
             }
 
             // Clear AUTH table
-            try (var clearAuth = connection.prepareStatement("DELETE FROM AUTH")) {
+            try (var clearAuth = connection.prepareStatement("DELETE FROM auth")) {
                 clearAuth.executeUpdate();
             }
 
             // Clear USER table
-            try (var clearUser = connection.prepareStatement("DELETE FROM USER")) {
+            try (var clearUser = connection.prepareStatement("DELETE FROM user")) {
                 clearUser.executeUpdate();
             }
 
             // Clear GAME table
-            try (var clearGame = connection.prepareStatement("DELETE FROM GAME")) {
+            try (var clearGame = connection.prepareStatement("DELETE FROM game")) {
                 clearGame.executeUpdate();
             }
 
@@ -61,7 +61,7 @@ public class MySQLDataAccess implements DataAccess{
     public GameData CreateGame(GameData myGame) throws DataAccessException {
         GameData gameWithID;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("INSERT INTO GAME (whiteUsername, blackUsername, gameName, GAMEID, Implementation) VALUES (?, ?, ?, ?, ?)")) {
+             var statement = connection.prepareStatement("INSERT INTO GAME (whiteUsername, blackUsername, gameName, gameID, Implementation) VALUES (?, ?, ?, ?, ?)")) {
             int gameId = nextGameId.getAndIncrement();
 
             statement.setString(1, myGame.whiteUsername());
@@ -116,7 +116,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void CreateAuth(AuthData myAuth) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("INSERT INTO AUTH (authToken, Username) VALUES (?, ?)")) {
+             var statement = connection.prepareStatement("INSERT INTO auth (authToken, Username) VALUES (?, ?)")) {
 
             statement.setString(1, myAuth.authToken());
             statement.setString(2, myAuth.username());
@@ -156,12 +156,12 @@ public class MySQLDataAccess implements DataAccess{
         }
         AuthData authData = null;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM AUTH WHERE authToken = ?")) {
+             var statement = connection.prepareStatement("SELECT * FROM auth WHERE authToken = ?")) {
             statement.setString(1, authToken);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     var retrievedAuthToken = resultSet.getString("authToken");
-                    var username = resultSet.getString("Username");
+                    var username = resultSet.getString("username");
 
                     authData = new AuthData(retrievedAuthToken, username);
                 }
@@ -176,7 +176,7 @@ public class MySQLDataAccess implements DataAccess{
     public GameData getGame(int gameID) throws DataAccessException {
         GameData gameData = null;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM GAME WHERE GAMEID = ?")) {
+             var statement = connection.prepareStatement("SELECT * FROM game WHERE gameID = ?")) {
             statement.setInt(1, gameID);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -185,7 +185,7 @@ public class MySQLDataAccess implements DataAccess{
                     String gameName = resultSet.getString("gameName");
 
                     // Deserialize the implementation from JSON
-                    String implementationJson = resultSet.getString("implementation");
+                    String implementationJson = resultSet.getString("Implementation");
                     Gson gson = new Gson();
                     ChessGame implementation = gson.fromJson(implementationJson, ChessGame.class);
 
@@ -204,15 +204,15 @@ public class MySQLDataAccess implements DataAccess{
     public List<GameData> listGames() throws DataAccessException {
         List<GameData> games = new ArrayList<>();
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("SELECT * FROM GAME")) {
+             var statement = connection.prepareStatement("SELECT * FROM game")) {
             try (var resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     // Retrieve game data from the result set
-                    int gameID = resultSet.getInt("GAMEID");
+                    int gameID = resultSet.getInt("gameID");
                     String whiteUsername = resultSet.getString("whiteUsername");
                     String blackUsername = resultSet.getString("blackUsername");
                     String gameName = resultSet.getString("gameName");
-                    String implementation = resultSet.getString("implementation");
+                    String implementation = resultSet.getString("Implementation");
                     //look at the implementation in the future.
                     // Create a new GameData object with the retrieved data
                     GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, null); // Replace null with the chess implementation
@@ -229,7 +229,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("DELETE FROM AUTH WHERE authToken = ?")) {
+             var statement = connection.prepareStatement("DELETE FROM auth WHERE authToken = ?")) {
 
             statement.setString(1, authToken);
 
@@ -248,13 +248,13 @@ public class MySQLDataAccess implements DataAccess{
         try (var connection = DatabaseManager.getConnection()) {
             // Update the game with the provided username based on playerColor
             if ("WHITE".equals(playerColor)) {
-                try (var statement = connection.prepareStatement("UPDATE GAME SET whiteUsername = ? WHERE GAMEID = ?")) {
+                try (var statement = connection.prepareStatement("UPDATE game SET whiteUsername = ? WHERE gameID = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());
                     statement.executeUpdate();
                 }
             } else if ("BLACK".equals(playerColor)) {
-                try (var statement = connection.prepareStatement("UPDATE GAME SET blackUsername = ? WHERE GAMEID = ?")) {
+                try (var statement = connection.prepareStatement("UPDATE game SET blackUsername = ? WHERE gameID = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());
                     statement.executeUpdate();
