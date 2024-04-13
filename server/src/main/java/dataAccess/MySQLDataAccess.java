@@ -53,6 +53,8 @@ public class MySQLDataAccess implements DataAccess{
     }
 
 
+
+
     @Override
     public GameData CreateGame(GameData myGame) throws DataAccessException {
         GameData gameWithID;
@@ -68,7 +70,8 @@ public class MySQLDataAccess implements DataAccess{
             // Check if implementation is null
             ChessGame implementation = myGame.implementation();
             if (implementation != null) {
-                statement.setString(5, implementation.toString());
+                var json = new Gson().toJson(implementation);
+                statement.setString(5, json);
             } else {
                 // Handle null implementation
                 statement.setNull(5, Types.VARCHAR);
@@ -144,6 +147,9 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
+        if(authToken == null){
+            throw new DataAccessException("AuthTokenNull");
+        }
         AuthData authData = null;
         try (var connection = DatabaseManager.getConnection();
              var statement = connection.prepareStatement("SELECT * FROM AUTH WHERE authToken = ?")) {
@@ -170,15 +176,16 @@ public class MySQLDataAccess implements DataAccess{
             statement.setInt(1, gameID);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-
                     String whiteUsername = resultSet.getString("whiteUsername");
                     String blackUsername = resultSet.getString("blackUsername");
                     String gameName = resultSet.getString("gameName");
 
-                    // I don't think I need the implementation because it is already stored.
-                    //NOTICE make sure this is the case later on.
+                    // Deserialize the implementation from JSON
+                    String implementationJson = resultSet.getString("implementation");
+                    Gson gson = new Gson();
+                    ChessGame implementation = gson.fromJson(implementationJson, ChessGame.class);
 
-                    gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, null); // Replace null with the chess implementation
+                    gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, implementation);
                 }
             }
         } catch (SQLException e) {
@@ -186,6 +193,7 @@ public class MySQLDataAccess implements DataAccess{
         }
         return gameData;
     }
+
 
 
     @Override
@@ -230,6 +238,9 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void updateGame(GameData game, String playerColor, String username) throws DataAccessException {
+        if(username == null){
+            throw new DataAccessException("The Username was null");
+        }
         try (var connection = DatabaseManager.getConnection()) {
             // Update the game with the provided username based on playerColor
             if ("WHITE".equals(playerColor)) {
