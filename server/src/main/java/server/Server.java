@@ -192,14 +192,14 @@ public class Server {
         UserData userData = userService.getUser(user);
 
         // Check if userData itself is null before accessing its properties
-        if (userData != null && userData.username() != null) {
+        if (userData != null) {
             res.status(403);
             res.body("{\"message\": \"Error: already taken\"}");
             return res.body();
         }
 
         // Add null check for userData
-        if (userData == null || user.password() == null || user.email() == null || user.username() == null) {
+        if (user.password() == null || user.email() == null || user.username() == null) {
             res.status(400);
             res.body("{\"message\": \"Error: bad request\"}");
             return res.body();
