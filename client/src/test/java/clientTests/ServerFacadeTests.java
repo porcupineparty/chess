@@ -48,11 +48,10 @@ public class ServerFacadeTests {
         String helpResponse = serverFacade.help();
         assertNotNull(helpResponse);
         assertFalse(helpResponse.isEmpty());
-
     }
     @Test
     public void testLogin() {
-        String response = serverFacade.login(username, password, url);
+        String response = serverFacade.login(username, password);
         assertNotNull(response);
 
         // Parse the JSON response
@@ -69,7 +68,7 @@ public class ServerFacadeTests {
     @Test
     public void testRegister() {
         //need to delete the user first.
-        String response = serverFacade.register(username, password, email, url);
+        String response = serverFacade.register(username, password, email);
         assertNotNull(response);
 
         // Parse the JSON response
@@ -86,11 +85,10 @@ public class ServerFacadeTests {
 
     @Test
     public void testQuit() {
-        String response = serverFacade.register(username, password, email, url);
+        String response = serverFacade.register(username, password, email);
         JsonObject jsonResponse = new Gson().fromJson(response, JsonObject.class);
-        String authToken = jsonResponse.get("authToken").getAsString(); // Assuming the authToken is returned in the response
 
-        String newResponse = serverFacade.quit(authToken, url);
+        String newResponse = serverFacade.quit();
 
         // Check if the response indicates successful logout
         assertEquals("Logout successful", newResponse);

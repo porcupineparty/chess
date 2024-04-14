@@ -1,14 +1,17 @@
 package client;
 
+import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class Repl {
     private final ServerFacade client;
+    private final String serverUrl;
 
     public Repl(String serverUrl) {
         this.client = new ServerFacade(serverUrl);
+        this.serverUrl = serverUrl;
     }
 
     public void run() {
@@ -35,6 +38,11 @@ public class Repl {
 //        System.out.println(RED + notification.message());
 //        printPrompt();
 //    }
+    private String promptInput(String prompt) {
+        System.out.print(prompt);
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
+    }
 
     private void printPrompt() {
         System.out.print("\n" + "LOGGED IN DUMMY" + ">>> " + SET_TEXT_COLOR_GREEN);
