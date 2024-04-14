@@ -16,7 +16,7 @@ public class Repl {
 
     public void run() {
         System.out.println("\uD83D\uDC36 Welcome to Chess :)");
-        System.out.print(client.help());
+        System.out.print(client.helpPrelogin());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -38,14 +38,12 @@ public class Repl {
 //        System.out.println(RED + notification.message());
 //        printPrompt();
 //    }
-    private String promptInput(String prompt) {
-        System.out.print(prompt);
-        Scanner scanner = new Scanner(System.in);
-        return scanner.nextLine();
-    }
 
     private void printPrompt() {
-        System.out.print("\n" + "LOGGED IN DUMMY" + ">>> " + SET_TEXT_COLOR_GREEN);
+        if (client.getAuthToken()) {
+            System.out.print("\n" + SET_TEXT_COLOR_BLUE + "LOGGED IN >>> " + SET_TEXT_COLOR_GREEN);
+        } else {
+            System.out.print("\n" + SET_TEXT_COLOR_RED + "LOGGED OUT >>> " + SET_TEXT_COLOR_GREEN);
+        }
     }
-
 }

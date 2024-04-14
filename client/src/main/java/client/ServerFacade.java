@@ -23,31 +23,75 @@ public class ServerFacade {
     }
 
     public String eval(String input) {
-        try {
-            // Split the input into command and arguments
-            String[] parts = input.trim().split("\\s+", 3);
-            String command = parts[0].toLowerCase();
-
-            // Determine which server request to make based on the command
+        String[] parts = input.trim().split("\\s+", 3);
+        String command = parts[0].toLowerCase();
+        if (authToken == null) {
+            // Prelogin UI commands
             switch (command) {
                 case "help":
-                    return help();
+                    return helpPrelogin();
+                case "quit":
+                    System.out.print("Exiting Application. . .");
+                    System.exit(0);
                 case "login":
                     return loginPrompt();
                 case "register":
                     return registerPrompt();
-                case "quit":
-                    return quit();
                 default:
-                    // Handle unrecognized command
-                    return help();
+                    return helpPrelogin();
             }
-        } catch (Exception e) {
-            return handleException(e);
+        } else {
+            // Postlogin UI commands
+            switch (command) {
+                case "help":
+                    return helpPostlogin();
+                case "logout":
+                    return logout();
+                case "create game":
+                    return createGame();
+                case "list games":
+                    return listGames();
+                case "join game":
+                    return joinGame();
+                case "join observer":
+                    return joinObserver();
+                default:
+                    return helpPostlogin();
+            }
         }
+    }
 
+    private String joinObserver() {
+        return null;
+    }
+
+    private String joinGame() {
+        return null;
+    }
+
+    private String listGames() {
+        return null;
+    }
+
+    private String createGame() {
+        return null;
+    }
+
+    private String quit() {
+        return null;
+    }
+
+    private String helpPostlogin() {
+        return "Command\tDescription\n" +
+                "Help\tDisplays text informing the user what actions they can take.\n" +
+                "Logout\tLogs out the user. Calls the server logout API to logout the user. After logging out with the server, the client should transition to the Prelogin UI.\n" +
+                "Create Game\tAllows the user to input a name for the new game. Calls the server create API to create the game. This does not join the player to the created game; it only creates the new game in the server.\n" +
+                "List Games\tLists all the games that currently exist on the server. Calls the server list API to get all the game data, and displays the games in a numbered list, including the game name and players (not observers) in the game. The numbering for the list should be independent of the game IDs.\n" +
+                "Join Game\tAllows the user to specify which game they want to join and what color they want to play. They should be able to enter the number of the desired game. Your client will need to keep track of which number corresponds to which game from the last time it listed the games. Calls the server join API to join the user to the game.\n" +
+                "Join Observer\tAllows the user to specify which game they want to observe. They should be able to enter the number of the desired game. Your client will need to keep track of which number corresponds to which game from the last time it listed the games. Calls the server join API to verify that the specified game exists.";
 
     }
+
 
     public String loginPrompt() {
         // Prompt the user for username and password
@@ -69,7 +113,7 @@ public class ServerFacade {
     }
 
 
-    public String help() {
+    public String helpPrelogin() {
         // Implement method to retrieve help information from the server
         //Command	Description
         //Help	Displays text informing the user what actions they can take.
@@ -111,6 +155,9 @@ public class ServerFacade {
                 }
             }
             connection.disconnect();
+            JsonObject jsonResponse = new Gson().fromJson(response.toString(), JsonObject.class);
+            this.authToken = jsonResponse.get("authToken").getAsString();
+            System.out.print(authToken);
 
             // Return the response from the server
             return response.toString();
@@ -176,10 +223,7 @@ public class ServerFacade {
         return scanner.nextLine();
     }
 
-    public String quit() {
-        if (authToken == null) {
-            return "You are not logged in.";
-        }
+    public String logout() {
 
         try {
             // Construct the URL for the session endpoint
@@ -198,6 +242,7 @@ public class ServerFacade {
             int responseCode = connection.getResponseCode();
             if (responseCode == 200) {
                 // Return a success message
+                authToken = null;
                 return "Logout successful";
             } else {
                 // Return an error message
@@ -217,5 +262,9 @@ public class ServerFacade {
     // Helper method to handle exceptions
     private String handleException(Throwable e) {
         return e.getMessage(); // Simple handling for demonstration purposes
+    }
+
+    public boolean getAuthToken() {
+        return this.authToken != null;
     }
 }
