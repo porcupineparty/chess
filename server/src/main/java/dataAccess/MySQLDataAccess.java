@@ -247,13 +247,13 @@ public class MySQLDataAccess implements DataAccess{
         }
         try (var connection = DatabaseManager.getConnection()) {
             // Update the game with the provided username based on playerColor
-            if ("WHITE".equals(playerColor)) {
+            if ("WHITE".equals(playerColor) || "White".equals(playerColor) || "white".equals(playerColor)) {
                 try (var statement = connection.prepareStatement("UPDATE GAME SET whiteusername = ? WHERE gameid = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());
                     statement.executeUpdate();
                 }
-            } else if ("BLACK".equals(playerColor)) {
+            } else if ("BLACK".equals(playerColor) || "black".equals(playerColor) || "Black".equals(playerColor)) {
                 try (var statement = connection.prepareStatement("UPDATE GAME SET blackusername = ? WHERE gameid = ?")) {
                     statement.setString(1, username);
                     statement.setInt(2, game.gameID());

@@ -45,7 +45,7 @@ public class ServerFacadeTests {
 
     @Test
     public void testHelp() {
-        String helpResponse = serverFacade.help();
+        String helpResponse = serverFacade.helpPrelogin();
         assertNotNull(helpResponse);
         assertFalse(helpResponse.isEmpty());
     }
