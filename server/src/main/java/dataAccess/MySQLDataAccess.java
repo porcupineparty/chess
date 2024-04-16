@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
@@ -8,7 +9,9 @@ import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,27 +64,34 @@ public class MySQLDataAccess implements DataAccess{
     public GameData CreateGame(GameData myGame) throws DataAccessException {
         GameData gameWithID;
         try (var connection = DatabaseManager.getConnection();
-             var statement = connection.prepareStatement("INSERT INTO GAME (whiteusername, blackusername, gamename, gameid, implementation) VALUES (?, ?, ?, ?, ?)")) {
-            int gameId = nextGameId.getAndIncrement();
+             var statement = connection.prepareStatement("INSERT INTO GAME (whiteusername, blackusername, gamename, implementation) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+
 
             statement.setString(1, myGame.whiteUsername());
             statement.setString(2, myGame.blackUsername());
             statement.setString(3, myGame.gameName());
-            statement.setInt(4, gameId);
 
-            // Check if implementation is null
-            ChessGame implementation = myGame.implementation();
-            if (implementation != null) {
-                var json = new Gson().toJson(implementation);
-                statement.setString(5, json);
-            } else {
-                // Handle null implementation
-                statement.setNull(5, Types.VARCHAR);
-            }
-            gameWithID = new GameData(gameId, myGame.whiteUsername(), myGame.blackUsername(), myGame.gameName(), myGame.implementation());
+
+
+            ChessBoard myNewBoard = new ChessBoard();
+            myNewBoard.resetBoard();
+            System.out.print(myNewBoard);
+            String chessBoardJson = new Gson().toJson(myNewBoard);
+            statement.setString(4, chessBoardJson);
+
+
+
 
             // Execute the update
             statement.executeUpdate();
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int gameId = generatedKeys.getInt(1); // Assuming the game ID is in the first column
+                gameWithID = new GameData(gameId, myGame.whiteUsername(), myGame.blackUsername(), myGame.gameName(), myGame.implementation());
+            } else {
+                throw new DataAccessException("Failed to retrieve generated game ID.");
+            }
+
         } catch (SQLException e) {
             throw new DataAccessException("Error executing create game: " + e.getMessage());
         }

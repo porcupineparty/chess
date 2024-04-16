@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -19,6 +20,8 @@ public class ServerFacade {
 
     private final String serverUrl;
 
+
+
     public ServerFacade(String serverUrl) {
         this.serverUrl = serverUrl;
     }
@@ -33,8 +36,7 @@ public class ServerFacade {
                 case "help":
                     return helpPrelogin();
                 case "quit":
-                    System.out.print("Exiting Application. . .");
-                    System.exit(0);
+                    quit();
                 case "login":
                     return loginPrompt();
                 case "register":
@@ -101,6 +103,8 @@ public class ServerFacade {
             // Enable output for sending request body
             connection.setDoOutput(true);
 
+
+
             // Write the request body to the connection output stream
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = requestBody.getBytes("utf-8");
@@ -117,6 +121,9 @@ public class ServerFacade {
             }
             // Close the connection
             connection.disconnect();
+            InitialChessBoard.printInitialChessBoard();
+            InitialChessBoard.printInitialChessBoardReverse();
+
 
             // Return the response from the server
             return response.toString();
@@ -126,15 +133,10 @@ public class ServerFacade {
         }
     }
 
-
-    public String joinGame() {
-        // Prompt the user to input the game ID and color
-        String gameId = promptInput("Enter the ID of the game you want to join: ");
-        String color = promptInput("Enter the color you want to play: ");
-
+    public String joinGameParser(String gameId, String playerColor){
         try {
             // Construct the request body
-            String requestBody = "{ \"gameID\": \"" + gameId + "\", \"playerColor\": \"" + color + "\"}";
+            String requestBody = "{ \"gameID\": \"" + gameId + "\", \"playerColor\": \"" + playerColor + "\"}";
 
             // Construct the URL for the join game endpoint
             URI uri = new URI(serverUrl + "/game");
@@ -154,6 +156,8 @@ public class ServerFacade {
             // Enable output for sending request body
             connection.setDoOutput(true);
 
+            connection.connect();
+
             // Write the request body to the connection output stream
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = requestBody.getBytes("utf-8");
@@ -168,8 +172,17 @@ public class ServerFacade {
                     response.append(responseLine.trim());
                 }
             }
+
+
+            // Print the ChessBoard state
+            System.out.println("ChessBoard State:");
+
+
             // Close the connection
             connection.disconnect();
+            InitialChessBoard.printInitialChessBoard();
+            InitialChessBoard.printInitialChessBoardReverse();
+
 
             // Return the response from the server
             return response.toString();
@@ -177,6 +190,12 @@ public class ServerFacade {
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    public String joinGame() {
+        // Prompt the user to input the game ID and color
+        String gameId = promptInput("Enter the ID of the game you want to join: ");
+        String playerColor = promptInput("Enter the color you want to play: ");
+        return joinGameParser(gameId, playerColor);
     }
 
 
@@ -217,6 +236,7 @@ public class ServerFacade {
             throw new RuntimeException(e);
         }
     }
+
 
 
     public String createGame() {
@@ -263,7 +283,12 @@ public class ServerFacade {
             connection.disconnect();
 
             // Return the response from the server
+
             return response.toString();
+
+
+// Set the initial chessboard state as part of the game implementation
+
 
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
@@ -271,11 +296,12 @@ public class ServerFacade {
     }
 
 
-    private String quit() {
-        return null;
+    public void quit() {
+        System.out.print("Exiting Application. . .");
+        System.exit(0);
     }
 
-    private String helpPostlogin() {
+    public String helpPostlogin() {
         return SET_TEXT_COLOR_BLUE + "Command\t\t\tDescription\n" +
                 "-------\t\t\t-----------\n" +
                 "Help\t\t\tDisplays text informing the user what actions they can take.\n" +
@@ -297,6 +323,32 @@ public class ServerFacade {
         // Call the login method with the provided username and password
         return login(username, password);
     }
+    public String clear() {
+        try {
+            // Construct the URL for the clear endpoint
+            URI uri = new URI(serverUrl + "/db");
+
+            // Create an HttpURLConnection object
+            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+
+            // Set the request method to DELETE
+            connection.setRequestMethod("DELETE");
+
+            // Check the response code to ensure successful clearance
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                // Return a success message
+                return "Clearance successful";
+            } else {
+                // Return an error message
+                return "Error: Clearance failed";
+            }
+
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public String registerPrompt() {
         // Prompt the user for username, password, and email
