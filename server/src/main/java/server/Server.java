@@ -99,12 +99,12 @@ public class Server {
             res.body("{\"message\": \"Error: bad request\"}");
             return res.body();
         }
-        if(game.blackUsername() != null && Objects.equals(playerColor, "BLACK")){
+        if(game.blackUsername() != null && playerColor.equalsIgnoreCase("BLACK")){
             res.status(403);
             res.body("{\"message\": \"Error: bad request\"}");
             return res.body();
         }
-        if(game.whiteUsername() != null && Objects.equals(playerColor, "WHITE")){
+        if(game.whiteUsername() != null && playerColor.equalsIgnoreCase("WHITE")){
             res.status(403);
             res.body("{\"message\": \"Error: bad request\"}");
             return res.body();

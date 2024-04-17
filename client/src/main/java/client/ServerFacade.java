@@ -3,15 +3,21 @@ package client;
 import chess.ChessBoard;
 import client.websocket.WebSocketFacade;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonArray;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import client.websocket.NotificationHandler;
+import com.mysql.cj.xdevapi.JsonValue;
 import exception.ResponseException;
 
 import static ui.EscapeSequences.*;
@@ -142,6 +148,7 @@ public class ServerFacade {
     public String highlightLegalMoves() {
         return null;
     }
+    private Map<Integer, Integer> dummyToActualIdMap = new HashMap<>();
 
     public String helpInGame() {
         return SET_TEXT_COLOR_BLUE + "Command\t\t\tDescription\n" +
@@ -158,10 +165,11 @@ public class ServerFacade {
     public String joinObserver() {
         // Prompt the user to input the game ID they want to observe
         String gameId = promptInput("Enter the ID of the game you want to observe: ");
+        String actualGameId = String.valueOf(dummyToActualIdMap.get(Integer.parseInt(gameId)));
 
         try {
             // Construct the request body
-            String requestBody = "{ \"gameID\": \"" + gameId + "\"}";
+            String requestBody = "{ \"gameID\": \"" + actualGameId + "\"}";
 
             // Construct the URL for the join observer endpoint
             URI uri = new URI(serverUrl + "/game");
@@ -277,9 +285,11 @@ public class ServerFacade {
     public String joinGame() {
         // Prompt the user to input the game ID and color
         String gameId = promptInput("Enter the ID of the game you want to join: ");
+        String actualGameId = String.valueOf(dummyToActualIdMap.get(Integer.parseInt(gameId)));
         String playerColor = promptInput("Enter the color you want to play: ");
-        return joinGameParser(gameId, playerColor);
+        return joinGameParser(actualGameId, playerColor);
     }
+
 
 
     public String listGames() {
@@ -309,8 +319,11 @@ public class ServerFacade {
                 }
                 // Close the connection
                 connection.disconnect();
-                // Return the list of games retrieved from the server
-                return response.toString();
+
+                System.out.println("Raw JSON response: " + response);
+
+                // Parse JSON and format output
+                return formatGameList(response.toString());
             } else {
                 // Return an error message
                 return "Error: Unable to list games";
@@ -319,6 +332,39 @@ public class ServerFacade {
             throw new RuntimeException(e);
         }
     }
+
+    private String formatGameList(String json) {
+        StringBuilder formattedOutput = new StringBuilder();
+        JsonObject gamesObject = JsonParser.parseString(json).getAsJsonObject();
+        JsonArray gamesArray = gamesObject.getAsJsonArray("games");
+
+        if (gamesArray != null) {
+            int dummyIdCounter = 1;
+            int actualIdCounter = 1;
+            formattedOutput.append("ID\tGame Name\t\tWhite Player\t\tBlack Player\n");
+            for (JsonElement element : gamesArray) {
+                JsonObject game = element.getAsJsonObject();
+                int actualId = game.get("gameID").getAsInt();
+                String gameName = game.get("gameName").getAsString();
+                // Check if whiteUsername is present before retrieving its value
+                String whitePlayer = game.has("whiteUsername") ? game.get("whiteUsername").getAsString() : "N/A";
+                // Check if blackUsername is present before retrieving its value
+                String blackPlayer = game.has("blackUsername") ? game.get("blackUsername").getAsString() : "N/A";
+                // Store the mapping of dummy ID to actual ID
+                dummyToActualIdMap.put(dummyIdCounter, actualId);
+                formattedOutput.append(String.format("%-3s\t%-15s\t%-20s\t%-15s\n", dummyIdCounter, gameName, whitePlayer, blackPlayer));
+                dummyIdCounter++;
+                actualIdCounter++;
+            }
+        } else {
+            formattedOutput.append("No games available.\n");
+        }
+
+        return formattedOutput.toString();
+    }
+
+
+
 
 
 

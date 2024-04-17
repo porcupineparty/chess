@@ -11,12 +11,19 @@ public class InitialChessBoard {
         // Create a new ChessBoard instance
         ChessBoard initialBoard = new ChessBoard();
 
-        // Reset the board to its initial state
         initialBoard.resetBoard();
 
-        // Print out the initial chessboard state using escape sequences
         System.out.println(EscapeSequences.ERASE_SCREEN);
-        for (int row = 1; row <= 8; row++) {
+
+
+        System.out.print(" ");
+        for (char c = 'A'; c <= 'H'; c++) {
+            System.out.print(" " + c + "  ");
+        }
+        System.out.println();
+
+        for (int row = 8; row >= 1; row--) {
+            System.out.print(row + " ");
             for (int col = 1; col <= 8; col++) {
                 ChessPiece piece = initialBoard.getPiece(new ChessPosition(row, col));
                 boolean isLightGrey = (row + col) % 2 == 0; // Check if the square is on an even row and an even column
@@ -31,25 +38,40 @@ public class InitialChessBoard {
                     System.out.print(EscapeSequences.EMPTY);
                 }
             }
-            // Reset the background color to black after printing each row
+
             System.out.print(EscapeSequences.RESET_BG_COLOR);
-            System.out.println(); // Move to the next line after printing each row
+            System.out.println(" " + row);
         }
+
+        // Print column labels at the bottom
+        System.out.print(" ");
+        for (char c = 'A'; c <= 'H'; c++) {
+            System.out.print(" " + c + "  ");
+        }
+        System.out.println();
     }
 
     public static void printInitialChessBoardReverse() {
-        // Create a new ChessBoard instance
+
         ChessBoard initialBoard = new ChessBoard();
 
-        // Reset the board to its initial state
         initialBoard.resetBoard();
 
-        // Print out the initial chessboard state using escape sequences in reverse direction
+
         System.out.println(EscapeSequences.ERASE_SCREEN);
-        for (int row = 8; row >= 1; row--) {
+
+
+        System.out.print(" ");
+        for (char c = 'H'; c >= 'A'; c--) {
+            System.out.print(" " + c + "  ");
+        }
+        System.out.println();
+
+        for (int row = 1; row <= 8; row++) {
+            System.out.print(row + " ");
             for (int col = 8; col >= 1; col--) {
                 ChessPiece piece = initialBoard.getPiece(new ChessPosition(row, col));
-                boolean isLightGrey = (row + col) % 2 == 0; // Check if the square is on an even row and an even column
+                boolean isLightGrey = (row + col) % 2 == 0;
 
                 if (piece != null) {
                     String pieceSymbol = getPieceSymbol(piece);
@@ -61,15 +83,21 @@ public class InitialChessBoard {
                     System.out.print(EscapeSequences.EMPTY);
                 }
             }
-            // Reset the background color to black after printing each row
+
             System.out.print(EscapeSequences.RESET_BG_COLOR);
-            System.out.println(); // Move to the next line after printing each row
+            System.out.println(" " + row);
         }
+
+        // Print column labels at the bottom
+        System.out.print(" ");
+        for (char c = 'H'; c >= 'A'; c--) {
+            System.out.print(" " + c + "  ");
+        }
+        System.out.println();
     }
 
-
     private static String getPieceSymbol(ChessPiece piece) {
-        // Determine the symbol for the given chess piece
+
         return switch (piece.getPieceType()) {
             case KING ->
                     piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING;
