@@ -200,7 +200,7 @@ public class Server {
         }
 
         // Add null check for userData
-        if (user.password() == null || user.email() == null || user.username() == null) {
+        if (user.password() == null || user.email() == null || user.username() == null || user.password().isEmpty() || user.email().isEmpty() || user.username().isEmpty()) {
             res.status(400);
             res.body("{\"message\": \"Error: bad request\"}");
             return res.body();

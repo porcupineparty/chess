@@ -80,7 +80,6 @@ public class ServerFacadeTests {
     @Test
     public void testLoginNegative() {
 
-
         assertThrows(RuntimeException.class, () -> serverFacade.login(username, password));
     }
     @Test
@@ -200,11 +199,8 @@ public class ServerFacadeTests {
     }
     @Test
     public void testRegisterNegative(){
-        String response = serverFacade.register("", "", "");
-        JsonObject jsonResponse = new Gson().fromJson(response, JsonObject.class);
-        System.out.print(jsonResponse);
-        assertEquals(jsonResponse.get("username").getAsString(), "");
-        assertNotEquals("goodUser", jsonResponse.get("username").getAsString());
+
+        assertThrows(RuntimeException.class, () -> serverFacade.register("", "", ""));
     }
 
 

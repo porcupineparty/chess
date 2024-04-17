@@ -417,6 +417,7 @@ public class ServerFacade {
     }
 
     public String register(String username, String password, String email) {
+
         // Construct the registration request body
         String requestBody = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\", \"email\": \"" + email + "\"}";
 
