@@ -2,16 +2,18 @@ package client;
 
 import java.util.Objects;
 import java.util.Scanner;
+import client.websocket.NotificationHandler;
+import webSocketMessages.ServerMessage;
 
 import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Repl implements NotificationHandler{
     private final ServerFacade client;
-    private final String serverUrl;
+
 
     public Repl(String serverUrl) {
-        this.client = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
+        this.client = new ServerFacade(serverUrl, this);
+
     }
 
     public void run() {
@@ -34,10 +36,10 @@ public class Repl {
         System.out.println();
     }
 
-//    public void notify(Notification notification) {
-//        System.out.println(RED + notification.message());
-//        printPrompt();
-//    }
+    public void notify(ServerMessage serverMessage) {
+        System.out.println(SET_TEXT_COLOR_RED + serverMessage.getMessage());
+        printPrompt();
+    }
 
     private void printPrompt() {
         if (client.getAuthToken()) {

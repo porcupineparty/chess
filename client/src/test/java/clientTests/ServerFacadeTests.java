@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import model.AuthData;
 import org.junit.jupiter.api.*;
 import server.Server;
+import chess.ChessBoard;
 
 import java.io.*;
 
@@ -38,7 +39,7 @@ public class ServerFacadeTests {
         var port = server.run(29586);
         url = "http://localhost:" + port;
         System.out.println("Started test HTTP server on " + port);
-        serverFacade = new ServerFacade(url);
+        serverFacade = new ServerFacade(url, null);
     }
 
     @AfterAll
@@ -57,6 +58,7 @@ public class ServerFacadeTests {
         String helpResponse = serverFacade.helpPrelogin();
         assertNotNull(helpResponse);
         assertFalse(helpResponse.isEmpty());
+
     }
     @Test
     public void testHelpTwo() {

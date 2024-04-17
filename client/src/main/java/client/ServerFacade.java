@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessBoard;
+import client.websocket.WebSocketFacade;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -10,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.*;
 import java.util.Scanner;
+import client.websocket.NotificationHandler;
+import exception.ResponseException;
 
 import static ui.EscapeSequences.*;
 
@@ -19,11 +22,18 @@ public class ServerFacade {
     private String authToken; // Store the authentication token
 
     private final String serverUrl;
+    private boolean inGame;
+    private String username;
+
+    private WebSocketFacade ws;
+    private final NotificationHandler notificationHandler;
 
 
 
-    public ServerFacade(String serverUrl) {
+    public ServerFacade(String serverUrl, NotificationHandler notificationHandler) {
         this.serverUrl = serverUrl;
+        this.notificationHandler = notificationHandler;
+
     }
 
     public String eval(String input) {
@@ -45,36 +55,104 @@ public class ServerFacade {
                     return helpPrelogin();
             }
         } else {
-            // Postlogin UI commands
-            switch (command) {
-                case "help":
-                    return helpPostlogin();
-                case "logout":
-                    return logout();
-                case "create":
-                    if ("game".equalsIgnoreCase(arguments)) {
-                        return createGame();
-                    } else {
-                        return helpPostlogin(); // Return help message if the argument is incorrect
-                    }
-                case "list":
-                    if ("games".equalsIgnoreCase(arguments)) {
-                        return listGames();
-                    } else {
-                        return helpPostlogin(); // Return help message if the argument is incorrect
-                    }
-                case "join":
-                    if ("game".equalsIgnoreCase(arguments)) {
-                        return joinGame();
-                    } else if("observer".equalsIgnoreCase(arguments)){
-                        return joinObserver(); // Return help message if the argument is incorrect
-                    } else {
-                        return helpPostlogin(); // Return help message if the argument is incorrect
-                    }
-                default:
-                    return helpPostlogin();
+            if(inGame == false){
+                switch (command) {
+                    case "help":
+                        return helpPostlogin();
+                    case "logout":
+                        return logout();
+                    case "create":
+                        if ("game".equalsIgnoreCase(arguments)) {
+                            return createGame();
+                        } else {
+                            return helpPostlogin(); // Return help message if the argument is incorrect
+                        }
+                    case "list":
+                        if ("games".equalsIgnoreCase(arguments)) {
+                            return listGames();
+                        } else {
+                            return helpPostlogin(); // Return help message if the argument is incorrect
+                        }
+                    case "join":
+                        if ("game".equalsIgnoreCase(arguments)) {
+                            return joinGame();
+                        } else if("observer".equalsIgnoreCase(arguments)){
+                            return joinObserver(); // Return help message if the argument is incorrect
+                        } else {
+                            return helpPostlogin(); // Return help message if the argument is incorrect
+                        }
+                    default:
+                        return helpPostlogin();
+                }
             }
+            else {
+                switch (command) {
+                    case "help":
+                        return helpInGame();
+                    case "redraw":
+                        if ("chess board".equalsIgnoreCase(arguments)){
+                            return redrawChessBoard();
+                        }
+                        else {
+                            return helpInGame();
+                        }
+                    case "leave":
+                        return leave();
+                    case "make":
+                        if ("move".equalsIgnoreCase(arguments)) {
+                            return makeMove();
+                        } else {
+                            return helpInGame(); // Return help message if the argument is incorrect
+                        }
+                    case "resign":
+                        return resign();
+                    case "highlight":
+                        if("legal moves".equalsIgnoreCase(arguments)){
+                            return highlightLegalMoves();
+                        }
+                        else{
+                            return helpInGame();
+                        }
+                    default:
+                        return helpInGame();
+
+                }
+            }
+            // Postlogin UI commands
+
         }
+    }
+
+    public String redrawChessBoard() {
+        return null;
+    }
+
+    public String leave() {
+        return null;
+    }
+
+    public String makeMove() {
+        return null;
+    }
+
+    public String resign() {
+        return null;
+    }
+
+    public String highlightLegalMoves() {
+        return null;
+    }
+
+    public String helpInGame() {
+        return SET_TEXT_COLOR_BLUE + "Command\t\t\tDescription\n" +
+                "-------\t\t\t-----------\n" +
+                "Help\t\t\tDisplays text informing the user what actions they can take.\n" +
+                "Redraw Chess Board\tRedraws the chess board upon the user’s request.\n" +
+                "Leave\t\t\tRemoves the user from the game (whether they are playing or observing the game). The client transitions back to the Post-Login UI.\n" +
+                "Make Move\t\tAllow the user to input what move they want to make. The board is updated to reflect the result of the move, and the board automatically updates on all clients involved in the game.\n" +
+                "Resign\t\t\tPrompts the user to confirm they want to resign. If they do, the user forfeits the game and the game is over. Does not cause the user to leave the game.\n" +
+                "Highlight Legal Moves\tAllows the user to input what piece for which they want to highlight legal moves. The selected piece’s current square and all squares it can legally move to are highlighted. This is a local operation and has no effect on remote users’ screens.";
+
     }
 
     public String joinObserver() {
@@ -123,6 +201,7 @@ public class ServerFacade {
             connection.disconnect();
             InitialChessBoard.printInitialChessBoard();
             InitialChessBoard.printInitialChessBoardReverse();
+            inGame = true;
 
 
             // Return the response from the server
@@ -183,11 +262,15 @@ public class ServerFacade {
             InitialChessBoard.printInitialChessBoard();
             InitialChessBoard.printInitialChessBoardReverse();
 
+            inGame = true;
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.joinPlayer(username);
+
 
             // Return the response from the server
             return response.toString();
 
-        } catch (URISyntaxException | IOException e) {
+        } catch (URISyntaxException | IOException | ResponseException e) {
             throw new RuntimeException(e);
         }
     }
@@ -363,12 +446,6 @@ public class ServerFacade {
 
 
     public String helpPrelogin() {
-        // Implement method to retrieve help information from the server
-        //Command	Description
-        //Help	Displays text informing the user what actions they can take.
-        //Quit	Exits the program.
-        //Login	Prompts the user to input login information. Calls the server login API to login the user. When successfully logged in, the client should transition to the Postlogin UI.
-        //Register	Prompts the user to input registration information. Calls the server register API to register and login the user. If successfully registered, the client should be logged in and transition to the Postlogin UI.
         return SET_TEXT_COLOR_BLUE + "Command\t\tDescription\n" +
                 "-------\t\t-----------\n" +
                 "Help\t\tDisplays text informing the user what actions they can take.\n" +
@@ -407,6 +484,7 @@ public class ServerFacade {
             connection.disconnect();
             JsonObject jsonResponse = new Gson().fromJson(response.toString(), JsonObject.class);
             this.authToken = jsonResponse.get("authToken").getAsString();
+            this.username = username;
 
             // Return the response from the server
             return response.toString();
@@ -459,6 +537,7 @@ public class ServerFacade {
             this.authToken = jsonResponse.get("authToken").getAsString();
             System.out.print(authToken);
             // Return the response from the server
+            this.username = username;
             return response.toString();
 
 
@@ -493,6 +572,7 @@ public class ServerFacade {
             if (responseCode == 200) {
                 // Return a success message
                 authToken = null;
+                username = null;
                 return "Logout successful";
             } else {
                 // Return an error message

@@ -11,6 +11,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import server.websocket.WebSocketHandler;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -29,9 +30,9 @@ public class Server {
     private GameService gameService = null;
     private ClearService clearService = null;
     private final AtomicInteger maxGameId = new AtomicInteger(1);
+    private WebSocketHandler webSocketHandler;
 
     public Server()  {
-
 
         try {
             // Attempt to initialize DataAccess and services
@@ -39,6 +40,8 @@ public class Server {
             userService = new UserService(DAO);
             gameService = new GameService(DAO);
             clearService = new ClearService(DAO);
+            webSocketHandler = new WebSocketHandler();
+
 
         } catch (Exception e) {
             // Handle any exceptions that occur during initialization
@@ -56,7 +59,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
 
-
+        Spark.webSocket("/connect", webSocketHandler);
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::registerUser);
         Spark.delete("/db", this::clearDatabase);
