@@ -239,6 +239,7 @@ public class ServerFacade {
 
 
 
+
     public String createGame() {
         // Prompt the user to input the name for the new game
         String gameName = promptInput("Enter the name for the new game: ");

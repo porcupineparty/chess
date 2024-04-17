@@ -78,6 +78,12 @@ public class ServerFacadeTests {
         assertEquals(username, returnedUsername);
     }
     @Test
+    public void testLoginNegative() {
+
+
+        assertThrows(RuntimeException.class, () -> serverFacade.login(username, password));
+    }
+    @Test
     public void testJoinObserver(){
         serverFacade.register(username, password, email);
         String userInput = validGameName + "\n";
@@ -97,6 +103,29 @@ public class ServerFacadeTests {
         assertTrue(joinObserverResponse.contains("Join successful"));
 
     }
+    @Test
+    public void testListGamesPositive() {
+
+        serverFacade.register(username, password, email);
+
+
+        String listGamesResponse = serverFacade.listGames();
+
+
+        assertNotNull(listGamesResponse);
+        assertTrue(listGamesResponse.contains("game"));
+    }
+    @Test
+    public void testListGamesNegative() {
+        //Not authenticated.
+        String listGamesResponse = serverFacade.listGames();
+
+
+        assertNotNull(listGamesResponse);
+        assertTrue(listGamesResponse.contains("Error: Unable to list games"));
+    }
+
+
     @Test
     public void testJoinGame() {
         serverFacade.register(username, password, email);
