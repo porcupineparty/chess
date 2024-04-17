@@ -5,13 +5,14 @@ import webSocketMessages.JoinPlayerCommand;
 import webSocketMessages.ServerMessage;
 import webSocketMessages.UserGameCommand;
 
+
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 
-public class WebSocketFacade extends Endpoint{
+public class WebSocketFacade extends Endpoint {
     Session session;
     NotificationHandler notificationHandler;
     public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
